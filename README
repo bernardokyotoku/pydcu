@@ -1,0 +1,5 @@
+You can get linux drivers at:
+http://www.thorlabs.com/software_pages/ViewSoftwarePage.cfm?Code=DCx
+
+After installed you should have /usr/lib/libueye_api.so in your
+machine.
