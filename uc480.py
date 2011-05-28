@@ -83,12 +83,15 @@ IS_CHAR = ctypes.c_byte
 #PUC480_CAMERA_INFO = ctypes.POINTER(UC480_CAMERA_INFO)
 
 if os.name=='nt':
-    # UNTESTED: Please report results to http://code.google.com/p/pylibuc480/issues
     libname = 'uc480'
     include_uc480_h = os.environ['PROGRAMFILES']+'\\Thorlabs DCU camera\\Develop\\Include\\uc480.h'
-    lib = ctypes.util.find_library(libname)
-    if lib is None:
-		print 'uc480.dll not found'
+if os.name=='posix':
+	libname = 'ueye_api'
+	include_uc480_h = "/usr/include/ueye.h"
+    # UNTESTED: Please report results to http://code.google.com/p/pylibuc480/issues
+lib = ctypes.util.find_library(libname)
+if lib is None:
+	print 'uc480.dll not found'
 
 		
 libuc480 = ctypes.cdll.LoadLibrary(lib)
