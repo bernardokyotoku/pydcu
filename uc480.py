@@ -6,24 +6,11 @@ import textwrap
 import numpy as np
 from numpy import ctypeslib
 import ctypes
+from uc480_types import *
 import ctypes.util
-import ctypes.wintypes
 import warnings
 
 from uc480_h import *
-from ctypes.wintypes import BYTE
-from ctypes.wintypes import WORD
-from ctypes.wintypes import DWORD
-from ctypes.wintypes import BOOL
-HCAM = ctypes.wintypes.HANDLE
-from ctypes.wintypes import HDC
-from ctypes.wintypes import HWND
-from ctypes.wintypes import INT
-c_char = ctypes.c_byte
-c_char_p = ctypes.POINTER(ctypes.c_byte)
-c_int_p = ctypes.POINTER(ctypes.c_int)
-from ctypes import c_int
-IS_CHAR = ctypes.c_byte 
 
 #class CAMINFO(ctypes.Structure):
 #	_fields_ = [("SerNo[12]    ",ctypes.c_char*12),  # (11 char)   

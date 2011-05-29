@@ -1,3 +1,6 @@
 Tue May 10 22:54:17 BRT 2011:seem like linux driver was successfully installed
 Tue May 10 22:55:17 BRT 2011:at least QuEyeCameraManager runs, but I do not have access to a mini usb cable to connect the camera to this computer
 Sat May 28 16:56:32 BRT 2011:not sure, just in case, to run dcu deamon type /etc/init.d/ueyeusbdrc start as root
+Sun May 29 11:42:06 BRT 2011:ldconfig -p, list most of libraries installed in your linux box, propably ldconfigured
+Sun May 29 19:11:28 BRT 2011:matplotlib finally installed
+Sun May 29 20:23:55 BRT 2011:uhuuu working
