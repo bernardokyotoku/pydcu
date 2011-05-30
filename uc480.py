@@ -74,8 +74,8 @@ NO_SUCCESS = -1
 #PUC480_CAMERA_INFO = ctypes.POINTER(UC480_CAMERA_INFO)
 
 if os.name=='nt':
-    libname = 'uc480'
-    include_uc480_h = os.environ['PROGRAMFILES']+'\\Thorlabs DCU camera\\Develop\\Include\\uc480.h'
+	libname = 'uc480'
+	include_uc480_h = os.environ['PROGRAMFILES']+'\\Thorlabs DCU camera\\Develop\\Include\\uc480.h'
 if os.name=='posix':
 	libname = 'ueye_api'
 	include_uc480_h = "/usr/include/ueye.h"
