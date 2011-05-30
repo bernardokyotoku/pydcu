@@ -353,16 +353,35 @@ class camera(HCAM):
 		return CALL("ExitCamera",self)
 	
 
+	def ReadEEPROM(self,offset = 0, count = 64):
+		"""
+		There is a rewritable EEPROM in the camera which serves as a 
+		small memory. Additionally to the information which is stored 
+		in the EEPROM, 64 extra bytes can be written. With the 
+		ReadEEPROM() command the contents of these 64 bytes can be read.
+		See WriteEEPROM.
+		"""
+		if offset + count > 64:
+			sys.stderr.write("offset + count too big, must be smaller or equal 64")
+			raise
+		buffer = ctypes.create_string_buffer(count)
+		r = CALL('ReadEEPROM',self,INT(offset),buffer,INT(count))
+		if r is not SUCCESS:
+			raise
+		return buffer.value
 
-	def WriteEEPROM(self, content, offset):
+	def WriteEEPROM(self, content, offset = 0):
 		"""	
 		In the DCU camera there is a rewritable EEPROM, where 64 bytes 
 		of information can be written. With the ReadEEPROM() function
 		the contents of this 64 byte block can be read.
 		"""
-		count = content.length
-		if count + offset > 63:
+		count = len(content)
+		if count + offset > 64:
 			sys.stderr.write("Content to long.")
 			raise
 		pcString = ctypes.c_char_p(content)
-		return CALL('WriteEEPROM',INT(offset),pcString,INT(count))
+		r = CALL('WriteEEPROM',self,INT(offset),pcString,INT(count))
+		if r is not SUCCESS:
+			raise
+		return r
