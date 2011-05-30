@@ -295,7 +295,7 @@ class camera(HCAM):
 		self.width = 1024
 		self.height = 768		
 		self.data = np.zeros((self.height,self.width),dtype=np.int8)
-		return SUCCESS
+		return None
 
 	def AddToSequence(self):# not done
 		return CALL('AddToSequence', ) 
