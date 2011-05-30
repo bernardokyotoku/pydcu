@@ -1,9 +1,14 @@
+import uc480
+
+def test_init():
+	camera = uc480.camera()
+	camera.ExitCamera()
 class Testuc480:
 	def setUp(self):
-		camera = uc480.initCamera()
+		self.camera = uc480.camera()
 
 	def tearDown(self):
-		camear.exitCamera()
+		self.camera.ExitCamera()
 
 	def test_writeEEPROM(self):
-		camera.writeEEPROM("test")
+		self.camera.WriteEEPROM("test")
