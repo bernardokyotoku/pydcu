@@ -9,8 +9,12 @@ import ctypes
 from uc480_types import *
 import ctypes.util
 import warnings
+import symbols as sym
 
 from uc480_h import *
+
+SUCCESS = 0
+NO_SUCCESS = -1
 
 #class CAMINFO(ctypes.Structure):
 #	_fields_ = [("SerNo[12]    ",ctypes.c_char*12),  # (11 char)   
@@ -186,7 +190,82 @@ if libuc480 is not None:
             # else:
                 # sys.stderr.write('%s%s warning:%s\n' % (funcname, args, text))
     # return return_code
+
+def is_value_return_function(funcname):
+	EnableAutoExit #Actual settings when called with IS_GET_AUTO_EXIT_ENABLED(), else IS_SUCCESS or
+	GetBusSpeed #IS_SUCCESS    USB 2.0 Controller available (hf=0)
+			#IS_NO_SUCCESS no USB 2.0 Controller available (hf=0)
+			#IS_USB_10     Controller port to which the camera is connected supports no USB 2.0
+			#	      IS_USB_20     Camera is connected to a USB 2.0 controller
+	GetCameraType # IS_CAMERA_TYPE_DCU_USB
+	GetDLLVersion # Number of the version
+	GetOsVersion # IS_OS_WIN2000, IS_OS_WINXP, IS_OS_WINSERVER2003
+	GetImageHistogram #IS_SUCCESS
+			#	IS_NO_SUCCESS
+			#	IS_NULL_POINTER invalid array
+			#	IS_INVALID_COLOR_FORMAT unsupported color format
+			#	IS_INVALID_PARAMETER unknown parameter ColorMode
+	InitCamera # IS_SUCCESS, error code (see header file)
+	LoadImage # 
+		#IS_SUCCESS                    Image is loaded error free.
+		#IS_FILE_READ_INVALID_BMP_SIZE The image to be load is larger than the active image memory.
+		#IS_FILE_READ_INVALID_BMP_ID   The file to be load does not have a valid bitmap format.
+		#IS_FILE_READ_OPEN_ERROR       The file cannot be opene
+	LoadImageMem  #	IS_SUCCESS (image is loaded error free)
+		      #  IS_FILE_READ_INVALID_BMP_ID (the file to be loaded does not have a valid bitmap format)
+		      #  IS_FILE_READ_OPEN_ERROR (the file cannot be opened)
+
+	SaveImageMemEx 	# IS_SUCCESS, IS_NO_SUCCESS
+			# IS_INVALID_PARAMETER (invalid file format or JPEG Quality)
+	SetBadPixelCorrection # IS_SUCCESS, IS_NO_SUCCESS, the current mode in connection with IS_GET_BPC_MODE or the current level in connection with IS_GET_BPC_THRESHOLD
+	SetBadPixelCorrectionTable # IS_SUCCESS, IS_NO_SUCCESS, or the number or coordinates in the list with IS_GET_LIST_SIZE
+	SetBayerConversion # In connection with IS_GET_BAYER_CV_MODE the current settings are read, else IS_SUCCESS or IS_NO_SUCCESS.
+	SetBinning # IS_SUCCESS, IS_NO_SUCCESS or the current settings with IS_GET_BINNING
+	SetBlCompensation # IS_SUCCESS, IS_NO_SUCCESS, current settings with IS_GET_BL_COMPENSATION, or the preset offset with IS_GET_BL_OFFSET
+	SetBrightness # In connection with IS_GET_CAMERA_ID the current ID is returned, else IS_SUCCESS or IS_NO_SUCCESS.
+	SetCameraID # In connection with IS_GET_CAMERA_ID the current ID is returned, else IS_SUCCESS or IS_NO_SUCCESS.
+	SetColorCorrection # Current settings when called with IS_GET_CCOR_MODE(), else IS_SUCCESS, IS_NO_SUCCESS
+	is_SetColorMode # Current setting when called with IS_GET_COLOR_MODE, else IS_SUCCESS, IS_NO_SUCCESS.
+	SetContrast # Current settings when called with IS_GET_CONTRAST else IS_SUCCESS, IS_NO_SUCCESS.
+	SetConvertParam # IS_SUCCESS, IS_NO_SUCCESS, IS_INVALID_COLOR_FORMAT or IS_INVALID_PARAMETER
+	SetDisplayMode # Current setting with IS_GET_DISPLAY_MODE, else IS_SUCCESS, IS_NO_SUCCESS
+	SetErrorReport # Current setting when called with IS_GET_ERR_REP_MODE else IS_SUCCESS, IS_NO_SUCCESS.
+	SetExternalTrigger # IS_SUCCESS, IS_NO_SUCCESS or current setting with IS_GET_EXTERNALTRIGGER IS_SET_TRIG_SOFTWARE | IS_SET_TRIG_HI_LO | IS_SET_TRIG_LO_HI using IS_GET_SUPPORTED_TRIGGER_MODE
+	SetFlashDelay # IS_SUCCESS, IS_NO_SUCCESS, current settings in connection with IS_GET_FLASH_DELAY or IS_GET_FLASH_DURATION.
+	SetFlashStrobe # IS_SUCCESS, IS_NO_SUCCESS, the current mode when used with IS_GET_FLASHSTROBE_MODE
+	SetGainBoost # Current setting when called with IS_GET_GAINBOOST else IS_NOT_SUPPORTED, IS_SUCCESS or IS_NO_SUCCESS
+	SetGamma # Current settings in connection with IS_GET_BRIGHTNESS, sonst IS_SUCCESS or IS_NO_SUCCESS
+	SetHardwareGain # Current setting when called with IS_GET_MASTER_GAIN, IS_GET_RED_GAIN, IS_GET_ GREEN_GAIN, IS_GET_BLUE_GAIN else IS_SUCCESS or IS_NO_SUCCESS
+	SetHardwareGamma # IS_SUCCESS, IS_NO_SUCCESS or IS_NOT_SUPPORTED
+	SetHWGainFactor # Current settings in connection with IS_GET_MASTER_GAIN_FACTOR, IS_GET_RED_GAIN_FACTOR, IS_GET_ GREEN_GAIN_FACTOR, IS_GET_BLUE_GAIN_FACTOR.
+	# Adjusted settings after the use of IS_SET_MASTER_GAIN_FACTOR, IS_SET_RED_GAIN_FACTOR, IS_SET_ GREEN_GAIN_FACTOR, IS_SET_BLUE_GAIN_FACTOR.
+	# Standard settings after the use of IS_GET_DEFAULT_MASTER_GAIN_FACTOR, IS_GET_DEFAULT_RED_GAIN_FACTOR, IS_GET_DEFAULT_ GREEN_GAIN_FACTOR, IS_GET_DEFAULT_BLUE_GAIN_FACTOR.
+	# Converted gain index after the use of IS_INQUIRE_ MASTER_GAIN_FACTOR, IS_INQUIRE_ RED_GAIN_FACTOR, IS_INQUIRE _ GREEN_GAIN_FACTOR, IS_INQUIRE _BLUE_GAIN_FACTOR.
+	SetImagePos # Current settings when called with IS_GET_IMAGE_POS_X and IS_GET_IMAGE_POS_Y as a parameter for x, else IS_SUCCESS, IS_NO_SUCCESS
+	SetImageSize # When used with IS_GET_IMAGE_SIZE_X and IS_GET_IMAGE_SIZE_Y the current settings are read, else IS_SUCCESS or IS_NO_SUCCESS.
 	
+	SetIO # IS_SUCCESS, IS_NO_SUCCESS, current settings in connection with IS_GET_IO.
+	SetKeyColor # Colour value in connection with IS_GET_KC_RGB, IS_GET_KC_RED, IS_GET_KC_GREEN, IS_GET_KC_BLUE else IS_SUCCESS, IS_NO_SUCCESS
+	SetPixelClock # Current settings when called with IS_GET_PIXEL_CLOCK, else IS_SUCCESS or IS_NO_SUCCESS
+	SetRopEffect # IS_SUCCESS, IS_NO_SUCCESS or the current settings in connection with IS_SET_ROP_EFFECT
+	SetSaturation # IS_SUCCESS, IS_NO_SUCCESS IS_INVALID_PARAMETER (invalid ChromU or ChromV value) Current settings in connection with IS_GET_SATURATION_U or IS_GET_SATURATION_V.
+	SetSubSampling # Current setting when called with IS_GET_SUBSAMPLING else IS_SUCCESS, IS_NO_SUCCESS
+	SetTestImage # In connection with IS_GET_TEST_IMAGE the current settings are read, else IS_SUCCESS or IS_NO_SUCCESS.
+	SetTriggerDelay # IS_SUCCESS, IS_NO_SUCCESS, current settings in connection with IS_GET_TRIGGER_DELAY
+	SetWhiteBalance # Current settings when called with IS_GET_WB_MODE(), else IS_SUCCESS, IS_NO_SUCCESS
+
+
+def CHK(return_code, funcname, *args):
+	if return_code is SUCCESS:
+		return SUCCESS
+	elif return_code is NO_SUCCESS:
+		raise
+	elif is_value_return_function(funcname):
+		return return_code
+	else:
+		sys.stderr.write(sym.ERROR_CODE[error_code])
+		raise
+
 def CALL(name, *args):
 	"""
 	Calls libuc480 function "name" and arguments "args".
@@ -200,22 +279,27 @@ def CALL(name, *args):
 			new_args.append (str (a))
 		else:
 			new_args.append (a)
-	r = func(*new_args)
+	r = func(*new_args) 
+	if r is NO_SUCCESS:
+		raise
 	return r
-
 		
 class camera(HCAM):
 	def __init__(self,camera_id=0):
 		#self.id = camera_id
 		HCAM.__init__(self,0)
-		self.h = CALL('InitCamera',ctypes.byref(self),HWND(0))
+		r = CALL('InitCamera',ctypes.byref(self),HWND(0))
+		if r is not SUCCESS:
+			sys.stderr.write(sym.ERROR_CODE[r])
+			raise
 		self.width = 1024
 		self.height = 768		
 		self.data = np.zeros((self.height,self.width),dtype=np.int8)
-		return None
+		return SUCCESS
+
+	def AddToSequence(self):# not done
+		return CALL('AddToSequence', ) 
 		
-	def ExitCamera(self):
-		return CALL('ExitCamera', ctypes.byref(self)) == 0
 		
 	def SaveImage(self,file):
 		return CALL('SaveImage',self,None)
@@ -232,7 +316,6 @@ class camera(HCAM):
 		CALL("FreezeVideo",self,INT(wait))
 		
 	def CopyImageMem(self):
-
 		r = CALL("CopyImageMem",self,self.image,self.id,self.data.ctypes.data)
 		if r == -1:
 			self.GetError()
@@ -243,28 +326,43 @@ class camera(HCAM):
 	def GetError(self):
 		self.err = ctypes.c_int()
 		self.errMessage = ctypes.c_char_p()
-		CALL("GetError",self,ctypes.byref(self.err),ctypes.byref(self.errMessage))
+		return CALL("GetError",self,ctypes.byref(self.err),ctypes.byref(self.errMessage))
 		
 	def SetImageMem (self):
-		CALL("SetImageMem",self,self.image,self.id)
+		return CALL("SetImageMem",self,self.image,self.id)
 		
 	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=IS_GET_IMAGE_SIZE_X_MAX):
-		CALL("SetImageSize",self,c_int(x),c_int(y))
+		return CALL("SetImageSize",self,c_int(x),c_int(y))
 		
 	def SetImagePos(self,x=0,y=0):
-		CALL("SetImagePos",self,c_int(x),c_int(y))
+		return CALL("SetImagePos",self,c_int(x),c_int(y))
 		
 	def CaptureVideo(self,wait=IS_DONT_WAIT):
-		CALL("CaptureVideo",self,c_int(wait))
+		return CALL("CaptureVideo",self,c_int(wait))
 		
 	def SetColorMode(self,color_mode=IS_SET_CM_Y8):
-		CALL("SetColorMode",self,c_int(color_mode))
+		return CALL("SetColorMode",self,c_int(color_mode))
 	
 	def SetSubSampling(self,mode=IS_SUBSAMPLING_DISABLE):
-		CALL("SetSubSampling",self,c_int(mode))
+		return CALL("SetSubSampling",self,c_int(mode))
 		
 	def StopLiveVideo(self,wait=IS_WAIT):
-		CALL("StopLiveVideo",self,c_int(wait))
+		return CALL("StopLiveVideo",self,c_int(wait))
 		
 	def ExitCamera (self):
-		CALL("ExitCamera",self)
+		return CALL("ExitCamera",self)
+	
+
+
+	def WriteEEPROM(self, content, offset):
+		"""	
+		In the DCU camera there is a rewritable EEPROM, where 64 bytes 
+		of information can be written. With the ReadEEPROM() function
+		the contents of this 64 byte block can be read.
+		"""
+		count = content.length
+		if count + offset > 63:
+			sys.stderr.write("Content to long.")
+			raise
+		pcString = ctypes.c_char_p(content)
+		return CALL('WriteEEPROM',INT(offset),pcString,INT(count))

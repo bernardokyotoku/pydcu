@@ -4,3 +4,11 @@ Sat May 28 16:56:32 BRT 2011:not sure, just in case, to run dcu deamon type /etc
 Sun May 29 11:42:06 BRT 2011:ldconfig -p, list most of libraries installed in your linux box, propably ldconfigured
 Sun May 29 19:11:28 BRT 2011:matplotlib finally installed
 Sun May 29 20:23:55 BRT 2011:uhuuu working
+Mon May 30 14:32:24 BRT 2011:nice regex \IS_\(\w*\)/\"\1"\) will replace IS_foo for "foo"
+Mon May 30 14:33:16 BRT 2011:\w is for escape for any word character, equals to [a-zA-Z0-9_]
+Mon May 30 14:33:41 BRT 2011:to use backreferences \( \) and use \1 to replace
+Mon May 30 15:50:05 BRT 2011:CALL return analysis can not base if it is successfull based only in the returning value
+Mon May 30 15:52:31 BRT 2011:there are several function that returns non zero values for successfull calls
+Mon May 30 15:54:30 BRT 2011:one option is, use a different call function for different returns types
+Mon May 30 15:54:57 BRT 2011:other is puting a parameter in the call function informing the types of return
+Mon May 30 15:55:50 BRT 2011:another is, keeping a list of the function and which return types they have
