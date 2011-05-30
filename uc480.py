@@ -15,6 +15,7 @@ from uc480_h import *
 
 SUCCESS = 0
 NO_SUCCESS = -1
+INVALID_HANDLER = 1
 
 #class CAMINFO(ctypes.Structure):
 #	_fields_ = [("SerNo[12]    ",ctypes.c_char*12),  # (11 char)   
@@ -281,7 +282,9 @@ def CALL(name, *args):
 			new_args.append (a)
 	r = func(*new_args) 
 	if r is NO_SUCCESS:
-		raise
+		raise Exception("NO_SUCCESS")
+	elif r is INVALID_HANDLER:
+		raise Exception("INVALID_HANDLER")
 	return r
 		
 class camera(HCAM):
@@ -365,9 +368,7 @@ class camera(HCAM):
 			sys.stderr.write("offset + count too big, must be smaller or equal 64")
 			raise
 		buffer = ctypes.create_string_buffer(count)
-		r = CALL('ReadEEPROM',self,INT(offset),buffer,INT(count))
-		if r is not SUCCESS:
-			raise
+		CALL('ReadEEPROM',self,INT(offset),buffer,INT(count))
 		return buffer.value
 
 	def WriteEEPROM(self, content, offset = 0):
@@ -381,7 +382,4 @@ class camera(HCAM):
 			sys.stderr.write("Content to long.")
 			raise
 		pcString = ctypes.c_char_p(content)
-		r = CALL('WriteEEPROM',self,INT(offset),pcString,INT(count))
-		if r is not SUCCESS:
-			raise
-		return r
+		return CALL('WriteEEPROM',self,INT(offset),pcString,INT(count))
