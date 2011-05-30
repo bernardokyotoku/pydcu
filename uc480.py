@@ -192,7 +192,6 @@ def CALL(name, *args):
 	Calls libuc480 function "name" and arguments "args".
 	"""
 	funcname = 'is_' + name
-	print name
 	func = getattr(libuc480, funcname)
 	new_args = []
 	for a in args:		
@@ -202,8 +201,6 @@ def CALL(name, *args):
 		else:
 			new_args.append (a)
 	r = func(*new_args)
-	print r
-  # r = CHK(r, funcname, *new_args)
 	return r
 
 		
@@ -224,13 +221,9 @@ class camera(HCAM):
 		return CALL('SaveImage',self,None)
 		
 	def AllocImageMem(self,width=1024,height=768,bitpixel=8):
-#		self.image = np.zeros((height,width),dtype=np.int8)
-
 		self.image = c_char_p()
 		self.id = c_int()
 		CALL('AllocImageMem',self,c_int(width),c_int(height),c_int(bitpixel),ctypes.byref(self.image),ctypes.byref(self.id))
-		print self.id
-#		CALL('AllocImageMem',self,c_int(width),c_int(height),c_int(bitpixel),self.image.data,ctypes.byref(self.id))
 	
 	def FreeImageMem (self):
 		CALL("FreeImageMem",self,self.image,self.id)
@@ -243,8 +236,8 @@ class camera(HCAM):
 		r = CALL("CopyImageMem",self,self.image,self.id,self.data.ctypes.data)
 		if r == -1:
 			self.GetError()
-			print self.err
-			print self.errMessage.value
+			sys.stderr.write(self.err)
+			sys.stderr.write(self.errMessage.value)
 		return 
 
 	def GetError(self):
@@ -256,7 +249,6 @@ class camera(HCAM):
 		CALL("SetImageMem",self,self.image,self.id)
 		
 	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=IS_GET_IMAGE_SIZE_X_MAX):
-		print IS_GET_IMAGE_SIZE_X_MAX
 		CALL("SetImageSize",self,c_int(x),c_int(y))
 		
 	def SetImagePos(self,x=0,y=0):
