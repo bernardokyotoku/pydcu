@@ -16,6 +16,9 @@ class Testuc480:
 	def test_writeEEPROM(self):
 		self.camera.WriteEEPROM("test")
 
+	def test_AllocImageMem(self):
+		assert self.camera.AllocImageMem() == 0
+
 
 def test_init():
 	camera = uc480.camera()

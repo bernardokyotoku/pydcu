@@ -1,14 +1,9 @@
-__all__ = [ ]
-
 import os
 import sys
 import textwrap
 import numpy as np
 from numpy import ctypeslib
-import ctypes
-from ctypes import byref,c_int,create_string_buffer,c_char_p
-from uc480_types import *
-import ctypes.util
+from ctypes import byref,c_int,create_string_buffer,c_char_p,cdll,util,c_void_p
 import warnings
 import symbols as sym
 
@@ -17,63 +12,10 @@ from uc480_h import *
 SUCCESS = 0
 NO_SUCCESS = -1
 INVALID_HANDLER = 1
-
-#class CAMINFO(ctypes.Structure):
-#	_fields_ = [("SerNo[12]    ",ctypes.c_char*12),  # (11 char)   
-#	            ("ID[20]       ",ctypes.c_char*20),  # e.g. "Company Name"      
-#	            ("Version[10]  ",ctypes.c_char*10),  # e.g. "V1.00"  (9 char)      
-#	            ("Date[12]     ",ctypes.c_char*12),  # e.g "11.03.2004" (11 char)      
-#	            ("Select       ",ctypes.c_byte	 ),  # 0 (contains camera select number for multi camera support)
-#	            ("Type         ",ctypes.c_byte	 ),  # 1 (contains camera type)
-#	            ("Reserved[8]  ",ctypes.c_char*8 )]  # (7 char)    
-##} CAMINFO, *PCAMINFO;
-#PCAMINFO = ctypes.POINTER(CAMINFO)
-#
-#class SENSORINFO(ctypes.Structure):
-#	_fields_ = [("SensorID        " , WORD   ),  # e.g. IS_SENSOR_C0640R13M
-#                ("strSensorName	  " , IS_CHAR),  # e.g. "C0640R13M"  	
-#                ("nColorMode      " , c_char ),  # e.g. IS_COLORMODE_BAYER  
-#                ("nMaxWidth       " , DWORD  ),  # e.g. 1280  
-#                ("nMaxHeight      " , DWORD  ),  # e.g. 1024  
-#                ("bMasterGain     " , BOOL   ),  # e.g. FALSE  
-#                ("bRGain          " , BOOL   ),  # e.g. TRUE  
-#                ("bGGain          " , BOOL   ),  # e.g. TRUE  
-#                ("bBGain          " , BOOL   ),  # e.g. TRUE  
-#                ("bGlobShutter    " , BOOL   ),  # e.g. TRUE  
-#                ("Reserved[16]    " , c_char*8)]  #  not used 				
-##typedef struct _SENSORINFO{
-##} SENSORINFO, *PSENSORINFO;
-#PSENSORINFO = ctypes.POINTER(SENSORINFO)
-#
-#class REVISIONINFO(ctypes.Structure):
-##{
-#	_fields_ = [("size            ", WORD  ),       # 2
-#				("Sensor          ", WORD  ),       # 2
-#				("Cypress         ", WORD  ),       # 2
-#				("Blackfin        ", DWORD ),       # 4
-#				("DspFirmware     ", WORD  ),       # 2
-#				("USB_Board       ", WORD  ),       # 2
-#				("Sensor_Board    ", WORD  ),       # 2
-#				("Processing_Board", WORD  ),       # 2
-#				("Memory_Board    ", WORD  ),       # 2
-#				("Housing         ", WORD  ),       # 2
-#				("Filter          ", WORD  ),       # 2
-#				("Timing_Board    ", WORD  ),       # 2
-#				("Product         ", WORD  ),       # 2
-#				("reserved[100]   ", BYTE*100  )]       # --128
-##} REVISIONINFO, *PREVISIONINFO;
-#PREVISIONINFO = ctypes.POINTER(REVISIONINFO)
-#
-#class UC480_CAMERA_INFO(ctypes.Structure):
-#	_fields_ = [("dwCameraID   	",DWORD  ),	# this is the user defineable camera ID
-#				("dwDeviceID   	",DWORD  ),	# this is the systems enumeration ID
-#				("dwSensorID   	",DWORD  ),	# this is the sensor ID e.g. IS_SENSOR_C0640R13M
-#				("dwInUse      	",DWORD  ),	# flag, whether the camera is in use or not
-#				("SerNo[16]    	",IS_CHAR*16),	# serial numer of the camera
-#				("Model[16]    	",IS_CHAR*16),	# model name of the camera
-#				("dwReserved[16]",DWORD  *16)] #
-##}UC480_CAMERA_INFO, *PUC480_CAMERA_INFO;
-#PUC480_CAMERA_INFO = ctypes.POINTER(UC480_CAMERA_INFO)
+HANDLE = c_void_p            
+HCAM = HANDLE
+HWND = c_void_p            
+INT = c_int
 
 if os.name=='nt':
 	libname = 'uc480'
@@ -81,13 +23,12 @@ if os.name=='nt':
 if os.name=='posix':
 	libname = 'ueye_api'
 	include_uc480_h = "/usr/include/ueye.h"
-    # UNTESTED: Please report results to http://code.google.com/p/pylibuc480/issues
-lib = ctypes.util.find_library(libname)
+lib = util.find_library(libname)
 if lib is None:
 	print 'uc480.dll not found'
 
 		
-libuc480 = ctypes.cdll.LoadLibrary(lib)
+libuc480 = cdll.LoadLibrary(lib)
 if libuc480 is not None:
 	uc480_h_name = 'uc480_h'
 	try:
@@ -120,13 +61,6 @@ if libuc480 is not None:
 				exec '%s = %s' % (name, value)
 				d[name] = eval(value)
 				l.append('%s = %s' % (name, value))
-			# elif name.startswith('DAQmxError') or name.startswith('DAQmxWarning'):
-				# assert value[0]=='(' and value[-1]==')', `name, value`
-				# value = int(value[1:-1])
-				# error_map[value] = name[10:]
-			# elif name.startswith('DAQmx_Val') or name[5:] in ['Success','_ReadWaitMode']:
-				# d[name] = eval(value)
-				# l.append('%s = %s' % (name, value))
 			elif is_number(value):
 				d[name] = eval(value)
 				l.append('%s = %s' % (name, value))
@@ -150,48 +84,6 @@ if libuc480 is not None:
 		print 'Please upload generated file %r to http://code.google.com/p/pylibuc480/issues' % (fn)
 	else:
 		pass
-		#d = uc480_h.__dict__
-	
-#	for name, value in d.items():
-#		if name.startswith ('_'): continue
-#		exec '%s = %r' % (name, value)
-
-
-# def CHK(return_code, funcname, *args):
-    # """
-    # Return ``return_code`` while handle any warnings and errors from
-    # calling a libuc480 function ``funcname`` with arguments
-    # ``args``.
-    # """
-    # if return_code==0: # call was succesful
-        # pass
-    # else:
-        # buf_size = default_buf_size
-        # while buf_size < 1000000:
-            # buf = ctypes.create_string_buffer('\000' * buf_size)
-            # try:
-                # r = libuc480.DAQmxGetErrorString(return_code, byref(buf), buf_size)
-            # except RuntimeError, msg:
-                # if 'Buffer is too small to fit the string' in str(msg):
-                    # buf_size *= 2
-                # else:
-                    # raise
-            # else:
-                # break
-        # if r:
-            # if return_code < 0:
-                # raise RuntimeError('%s%s failed with error %s=%d: %s'%\
-                                       # (funcname, args, error_map[return_code], return_code, repr(buf.value)))
-            # else:
-                # warning = error_map.get(return_code, return_code)
-                # sys.stderr.write('%s%s warning: %s\n' % (funcname, args, warning))                
-        # else:
-            # text = '\n  '.join(['']+textwrap.wrap(buf.value, 80)+['-'*10])
-            # if return_code < 0:
-                # raise RuntimeError('%s%s:%s' % (funcname,args, text))
-            # else:
-                # sys.stderr.write('%s%s warning:%s\n' % (funcname, args, text))
-    # return return_code
 
 def is_value_return_function(funcname):
 	EnableAutoExit #Actual settings when called with IS_GET_AUTO_EXIT_ENABLED(), else IS_SUCCESS or
@@ -288,15 +180,6 @@ def CALL(name, *args):
 		raise Exception("INVALID_HANDLER")
 	return r
 
-class image():
-	def __init__(self):
-		self.image_buffer
-		self.id
-		self.camera
-
-	def __del__(self):
-		self.camera.FreeImageMem(self.image_buffer,self.id)
-		
 class camera(HCAM):
 	def __init__(self,camera_id=0):
 		#self.id = camera_id
@@ -311,11 +194,14 @@ class camera(HCAM):
 		self.data = np.zeros((self.height,self.width),dtype=np.int8)
 		return None
 
-	def __del__(self):
-		self.ExitCamera()
-
 	def AddToSequence(self):
 		"""
+		AddToSequence() inserts image memory into the image memory list,
+		which is to be used for ring buffering. The image memory has to
+		be allocated with AllocImageMem(). All image memory which is 
+		used for ring buffering must have been allocated the same colour
+		depth (i.e. bits per pixel). The number of image memories for a
+		sequence (nID) is limited to the integer value range.  
 		Not tested!
 		"""
 		self.seq += 1
@@ -323,9 +209,10 @@ class camera(HCAM):
 
 	def ClearSequence(self):
 		"""
-		ClearSequence() deletes all image memory from the sequence list that was inserted with
-		AddToSequence(). After ClearSequence() no more image memory is active. To make a
-		certain part of the image memory active, SetImageMem() and SetImageSize() have to be
+		ClearSequence() deletes all image memory from the sequence list
+		that was inserted with AddToSequence(). After ClearSequence() no
+		more image memory is active. To make a certain part of the image
+		memory active, SetImageMem() and SetImageSize() have to be 
 		executed.
 		Not tested!
 		"""
@@ -359,7 +246,7 @@ class camera(HCAM):
 	def TransferImage():
 		"""
 		Experiment to find out how it works
-		TransferImage(self, INT nMemID, INT seqID, INT imageNr, INT reserved):
+		TransferImage(self, INT nMemID, INT seqID, INT imageNr, INT reserved)
 		Not in the user manual!
 		Not implemented!
 		"""
@@ -380,10 +267,10 @@ class camera(HCAM):
 		specified memory board sequence. The assigned sequence ID is required as a parameter.
 		Not tested!
 		"""
-		top    = c_int() 
-		left   = c_int()
-		right  = c_int()
-		bottom = c_int()
+		top    = INT() 
+		left   = INT()
+		right  = INT()
+		bottom = INT()
 		CALL('GetMemorySequenceWindow',self,INT(id),byref(left),byref(top),byref(right),byref(bottom))
 		return (left.value,top.value,right.value,bottom.value)
 
@@ -400,26 +287,67 @@ class camera(HCAM):
 		sition is currently taking place. The number is not the ID of 
 		the image memory which is provided from AllocImageMem(), but the
 		running number in the sequence as defined in AddToSequence().
+		Not tested!
 		"""
-		aqID = c_int()
-		ppcMem = c_char_p()
-		ppcMemLast = c_char_p()
-		CALL('GetActSeqBuf',self,byref(aqID,byref(ppcMem),byref(ppcMemLast))
+		aqID = INT()
+		pcMem = c_char_p()
+		pcMemLast = c_char_p()
+		ppcMem = byref(pcMem)
+		ppcMemLast = byref(pcMemLast)
+		CALL('GetActSeqBuf',self,byref(aqID,ppcMem,ppcMemLast))
 		
 	def AllocImageMem(self,width=1024,height=768,bitpixel=8):
+		"""
+		AllocImageMem() allocates image memory for an image with width,
+		width and height, height and colour depth bitspixel. Memory size
+		is at least:
+
+		size = [width * ((bitspixel + 1) / 8) + adjust] * height
+		adjust see below
+
+		Line increments are calculated with:
+
+		line 	= width * [(bitspixel + 1) / 8]
+		lineinc = line + adjust.
+		adjust  = 0 when line without rest is divisible by 4
+		adjust 	= 4 - rest(line / 4) 
+				when line without rest is not divisible by 4
+
+
+		The line increment can be read with the GetImgMemPitch() func-
+		tion. The start address in the image memory is returned with 
+		ppcImgMem. pid contains an identification number of the alloc-
+		ated memory. A newly activated memory location is not directly 
+		activated. In other words, images are not directly digitized to
+		this new memory location. Before this can happen, the new memory
+		location has to be activated with SetImageMem(). After 
+		SetImageMem() an SetImageSize() must follow so that the image 
+		conditions can be transferred to the newly activated memory 
+		location. The returned pointer has to be saved and may be 
+		reused, as it is required for all further ImageMem functions! 
+		The freeing of the memory is achieved with FreeImageMem(). In 
+		the DirectDraw modes, the allocation of an image memory is not 
+		required!
+		"""
 		self.image = c_char_p()
-		self.id = c_int()
-		CALL('AllocImageMem',self,c_int(width),c_int(height),c_int(bitpixel),byref(self.image),byref(self.id))
+		self.id = INT()
+		return CALL('AllocImageMem',self,
+			INT(width),
+			INT(height),
+			INT(bitpixel),
+			byref(self.image),
+			byref(self.id))
 
 	def GetNumberOfMemoryImages(self):
 		"""
-		The function GetNumberOfMemoryImages() returns the number of valid images that are cur-
-		rently located in the camera memory within the specified sequence ID. This number can differ
-		from the originally recorded number of images because of overwriting.
+		The function GetNumberOfMemoryImages() returns the number of 
+		valid images that are currently located in the camera memory 
+		within the specified sequence ID. This number can differ from 
+		the originally recorded number of images because of overwriting.
 		Not tested!
 
 		"""
-		number = ctype.c_int()
+		number = ctype.INT()
 		CALL('GetNumberOfMemoryImages',self,INT(self.seq),byref(number))
 		return number.value
 	
@@ -427,7 +355,7 @@ class camera(HCAM):
 		return CALL("SetImageMem",self,self.image,self.id)
 		
 	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=IS_GET_IMAGE_SIZE_X_MAX):
-		return CALL("SetImageSize",self,c_int(x),c_int(y))
+		return CALL("SetImageSize",self,INT(x),INT(y))
 
 	def FreeImageMem (self):
 		return CALL("FreeImageMem",self,self.image,self.id)
@@ -477,7 +405,7 @@ class camera(HCAM):
 		return 
 
 	def GetError(self):
-		self.err = c_int()
+		self.err = INT()
 		self.errMessage = c_char_p()
 		return CALL("GetError",self,byref(self.err),byref(self.errMessage))
 
@@ -485,19 +413,19 @@ class camera(HCAM):
 		return CALL('SaveImage',self,None)
 		
 	def SetImagePos(self,x=0,y=0):
-		return CALL("SetImagePos",self,c_int(x),c_int(y))
+		return CALL("SetImagePos",self,INT(x),INT(y))
 		
 	def CaptureVideo(self,wait=IS_DONT_WAIT):
-		return CALL("CaptureVideo",self,c_int(wait))
+		return CALL("CaptureVideo",self,INT(wait))
 		
 	def SetColorMode(self,color_mode=IS_SET_CM_Y8):
-		return CALL("SetColorMode",self,c_int(color_mode))
+		return CALL("SetColorMode",self,INT(color_mode))
 	
 	def SetSubSampling(self,mode=IS_SUBSAMPLING_DISABLE):
-		return CALL("SetSubSampling",self,c_int(mode))
+		return CALL("SetSubSampling",self,INT(mode))
 		
 	def StopLiveVideo(self,wait=IS_WAIT):
-		return CALL("StopLiveVideo",self,c_int(wait))
+		return CALL("StopLiveVideo",self,INT(wait))
 		
 	def ExitCamera (self):
 		return CALL("ExitCamera",self)
@@ -526,7 +454,6 @@ class camera(HCAM):
 		"""
 		count = len(content)
 		if count + offset > 64:
-			sys.stderr.write("Content to long.")
-			raise
+			raise Exception("Content to long")
 		pcString = c_char_p(content)
 		return CALL('WriteEEPROM',self,INT(offset),pcString,INT(count))
