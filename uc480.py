@@ -202,7 +202,6 @@ class camera(HCAM):
 		used for ring buffering must have been allocated the same colour
 		depth (i.e. bits per pixel). The number of image memories for a
 		sequence (nID) is limited to the integer value range.  
-		Not tested!
 		"""
 		self.seq += 1
 		return CALL('AddToSequence',self,self.image,self.id) 
