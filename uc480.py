@@ -463,8 +463,7 @@ class camera(HCAM):
 				seconds (this is approx. 5 minutes and 20 
 				seconds) can be waited. For 1 < Wait < 10 Wait 
 				becomes equal to 10.
-		
-		(Exp.: Wait = 100 ⇒ wait 1 sec.)
+		(Exp.: Wait = 100 => wait 1 sec.)
 		"""
 		return CALL("CaptureVideo",self,INT(wait))
 		
@@ -474,7 +473,19 @@ class camera(HCAM):
 	def SetSubSampling(self,mode=IS_SUBSAMPLING_DISABLE):
 		return CALL("SetSubSampling",self,INT(mode))
 		
-	def StopLiveVideo(self,wait=IS_WAIT):
+	def StopLiveVideo(self,wait=IS_DONT_WAIT):
+		"""
+		The StopLiveVideo() function freezes the image in the VGA card 
+		or in the PC's system memory. The function is controlled with 
+		the parameter Wait. The function has two modes: Using the first
+		mode, the function immediately returns to the calling function 
+		and grabs the image in the background. In the second mode the 
+		function waits until the image has been completely acquired and
+		only then does the function return.
+		By the use of IS_FORCE_VIDEO_STOP a single frame recording which
+		is started with FreezeVideo(IS_DONT_WAIT) can be terminated
+		immediately.
+		"""
 		return CALL("StopLiveVideo",self,INT(wait))
 		
 	def ExitCamera (self):

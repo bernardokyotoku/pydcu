@@ -39,6 +39,12 @@ class Testuc480:
 		self.camera.SetImageMem()
 		assert self.camera.CaptureVideo() == 0
 
+	def test_StopLiveVideo(self):
+		self.camera.AllocImageMem()
+		self.camera.SetImageMem()
+		self.camera.CaptureVideo() 
+		assert self.camera.StopLiveVideo() == 0
+
 def test_init():
 	camera = uc480.camera()
 	camera.ExitCamera()
