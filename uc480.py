@@ -443,6 +443,29 @@ class camera(HCAM):
 		return CALL("SetImagePos",self,INT(x),INT(y))
 		
 	def CaptureVideo(self,wait=IS_DONT_WAIT):
+		"""
+		CaptureVideo() digitizes video images in real time and transfers
+		the images to the previously allocated image memory. 
+		Alternatively if you are using DirectDraw the images can be 
+		transferred to the graphics board. The image acquisition (DIB 
+		Mode) takes place in the memory which has been set by 
+		SetImageMem() and AllocImageMem(). GetImageMem() determines 
+		exactly where the start address in memory is. In case of ring 
+		buffering, then image acquisition loops endlessly through all 
+		image memeories added to the sequence.
+
+		wait
+	 	IS_DONT_WAIT	This function synchronizes the image acquisition				of the V-SYNC, but returns immediately.
+		IS_WAIT		This function synchronizes the image acquisition
+				of the V-SYNC and only then does return (i.e.
+				waits until image acquisition begins)
+		10<wait<32768	Wait time in 10 ms steps. A maximum of 327.68 
+				seconds (this is approx. 5 minutes and 20 
+				seconds) can be waited. For 1 < Wait < 10 Wait 
+				becomes equal to 10.
+		
+		(Exp.: Wait = 100 ⇒ wait 1 sec.)
+		"""
 		return CALL("CaptureVideo",self,INT(wait))
 		
 	def SetColorMode(self,color_mode=IS_SET_CM_Y8):

@@ -34,6 +34,11 @@ class Testuc480:
 		assert self.camera.SetImageSize(x = uc480.IS_GET_IMAGE_SIZE_X) == 300
 		assert self.camera.SetImageSize(x = uc480.IS_GET_IMAGE_SIZE_Y) == 200
 
+	def test_CaptureVideo(self):
+		self.camera.AllocImageMem()
+		self.camera.SetImageMem()
+		assert self.camera.CaptureVideo() == 0
+
 def test_init():
 	camera = uc480.camera()
 	camera.ExitCamera()
