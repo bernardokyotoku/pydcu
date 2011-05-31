@@ -19,6 +19,14 @@ class Testuc480:
 	def test_AllocImageMem(self):
 		assert self.camera.AllocImageMem() == 0
 
+	def test_FreeImageMem(self):
+		self.camera.AllocImageMem()
+		assert self.camera.FreeImageMem() == 0
+
+	def test_SetImageMem(self):
+		self.camera.AllocImageMem()
+		assert self.camera.SetImageMem() == 0
+
 
 def test_init():
 	camera = uc480.camera()

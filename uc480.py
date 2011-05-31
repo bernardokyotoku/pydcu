@@ -352,12 +352,25 @@ class camera(HCAM):
 		return number.value
 	
 	def SetImageMem (self):
+		"""
+		SetImageMem() sets the allocated image memory to active memory.
+		Only an active image memory can receive image data. After 
+		calling SetImageMem() function is_SetImageSize() must follow to
+		set the image size of the active memory. A pointer from function
+		AllocImgMem() has to be given to parameter pcImgMem.
+		"""
 		return CALL("SetImageMem",self,self.image,self.id)
 		
 	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=IS_GET_IMAGE_SIZE_X_MAX):
 		return CALL("SetImageSize",self,INT(x),INT(y))
 
 	def FreeImageMem (self):
+		"""
+		FreeImageMem() deallocates previously allocated image memory.i
+		For pcImgMem one of the pointers from AllocImgMem() has to be 
+		used. All other pointers lead to an error message! The repeated
+		handing over of the same pointers also leads to an error message
+		"""
 		return CALL("FreeImageMem",self,self.image,self.id)
 
 	def SetAllocatedImageMem(self):
