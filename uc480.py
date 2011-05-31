@@ -6,6 +6,7 @@ import textwrap
 import numpy as np
 from numpy import ctypeslib
 import ctypes
+from ctypes import byref,c_int,create_string_buffer,c_char_p
 from uc480_types import *
 import ctypes.util
 import warnings
@@ -169,7 +170,7 @@ if libuc480 is not None:
         # while buf_size < 1000000:
             # buf = ctypes.create_string_buffer('\000' * buf_size)
             # try:
-                # r = libuc480.DAQmxGetErrorString(return_code, ctypes.byref(buf), buf_size)
+                # r = libuc480.DAQmxGetErrorString(return_code, byref(buf), buf_size)
             # except RuntimeError, msg:
                 # if 'Buffer is too small to fit the string' in str(msg):
                     # buf_size *= 2
@@ -286,34 +287,183 @@ def CALL(name, *args):
 	elif r is INVALID_HANDLER:
 		raise Exception("INVALID_HANDLER")
 	return r
+
+class image():
+	def __init__(self):
+		self.image_buffer
+		self.id
+		self.camera
+
+	def __del__(self):
+		self.camera.FreeImageMem(self.image_buffer,self.id)
 		
 class camera(HCAM):
 	def __init__(self,camera_id=0):
 		#self.id = camera_id
 		HCAM.__init__(self,0)
-		r = CALL('InitCamera',ctypes.byref(self),HWND(0))
+		r = CALL('InitCamera',byref(self),HWND(0))
 		if r is not SUCCESS:
 			sys.stderr.write(sym.ERROR_CODE[r])
 			raise
 		self.width = 1024
 		self.height = 768		
+		self.seq = 0
 		self.data = np.zeros((self.height,self.width),dtype=np.int8)
 		return None
 
-	def AddToSequence(self):# not done
-		return CALL('AddToSequence', ) 
-		
-		
-	def SaveImage(self,file):
-		return CALL('SaveImage',self,None)
+	def __del__(self):
+		self.ExitCamera()
+
+	def AddToSequence(self):
+		"""
+		Not tested!
+		"""
+		self.seq += 1
+		return CALL('AddToSequence',self,self.image,self.id) 
+
+	def ClearSequence(self):
+		"""
+		ClearSequence() deletes all image memory from the sequence list that was inserted with
+		AddToSequence(). After ClearSequence() no more image memory is active. To make a
+		certain part of the image memory active, SetImageMem() and SetImageSize() have to be
+		executed.
+		Not tested!
+		"""
+		return CALL('CleaSequence',self)
+			
+	def LockSeqBuf(self,number):
+		"""
+		Not tested!
+		"""
+		CALL('LockSeqBuf',self,INT(number),self.image)
+
+	def UnlockSeqBuf(self,number):
+		"""
+		With UnlockSeqBuf() image acquisition is allowed in a previously
+		locked image memory. The image memory is put to the previous 
+		position in the sequence list.
+		"""
+		CALL('UnlockSeqBuf',self,INT(number),self.image)
+
+	def GetLastMemorySequence(self):
+		"""
+		The function GetLastMemorySequence() returns the ID of the last
+		recorded sequence in the memory board. This parameter can then 
+		be used in combination with the function TransferImage() to read
+		images out of the camera memory.
+		Not tested!
+		"""
+
+		CALL('GetLastMemorySequence',self,self.id)
+
+	def TransferImage():
+		"""
+		Experiment to find out how it works
+		TransferImage(self, INT nMemID, INT seqID, INT imageNr, INT reserved):
+		Not in the user manual!
+		Not implemented!
+		"""
+		CALL('TransferImage',self,INT(),INT(),INT(),INT())
+
+	def TransferMemorySequence(): 
+		"""
+		Experiment to find out how it works
+		TransferMemorySequence(HIDS hf, INT seqID, INT StartNr, INT nCount, INT nSeqPos);
+		Not in the user manual!
+		Not implemented!
+		"""
+		pass
+
+	def GetMemorySequenceWindow(self,id):
+		"""
+		The function GetMemorySequenceWindow() can be used to check the window size of a
+		specified memory board sequence. The assigned sequence ID is required as a parameter.
+		Not tested!
+		"""
+		top    = c_int() 
+		left   = c_int()
+		right  = c_int()
+		bottom = c_int()
+		CALL('GetMemorySequenceWindow',self,INT(id),byref(left),byref(top),byref(right),byref(bottom))
+		return (left.value,top.value,right.value,bottom.value)
+
+	def GetActSeqBuf(self):
+		"""
+		With GetActSeqBuf() the image memory in which image acquisition
+		(ppcMem) is currently taking place and the image memory which 
+		was last used for image acquisition (ppcMemLast) can be deter-
+		mined. This function is only available when the ring buffer is 
+		active. If image acquisition is started for a ring buffer, 
+		GetActSeqBuf returns 0 in pnNum as long as data is acquired to 
+		the first image memory of the sequence. And thus pnNum receives
+		the number of the sequence image memory, in which image acqui-
+		sition is currently taking place. The number is not the ID of 
+		the image memory which is provided from AllocImageMem(), but the
+		running number in the sequence as defined in AddToSequence().
+		"""
+		aqID = c_int()
+		ppcMem = c_char_p()
+		ppcMemLast = c_char_p()
+		CALL('GetActSeqBuf',self,byref(aqID,byref(ppcMem),byref(ppcMemLast))
 		
 	def AllocImageMem(self,width=1024,height=768,bitpixel=8):
 		self.image = c_char_p()
 		self.id = c_int()
-		CALL('AllocImageMem',self,c_int(width),c_int(height),c_int(bitpixel),ctypes.byref(self.image),ctypes.byref(self.id))
+		CALL('AllocImageMem',self,c_int(width),c_int(height),c_int(bitpixel),byref(self.image),byref(self.id))
+
+	def GetNumberOfMemoryImages(self):
+		"""
+		The function GetNumberOfMemoryImages() returns the number of valid images that are cur-
+		rently located in the camera memory within the specified sequence ID. This number can differ
+		from the originally recorded number of images because of overwriting.
+		Not tested!
+
+		"""
+		number = ctype.c_int()
+		CALL('GetNumberOfMemoryImages',self,INT(self.seq),byref(number))
+		return number.value
 	
+	def SetImageMem (self):
+		return CALL("SetImageMem",self,self.image,self.id)
+		
+	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=IS_GET_IMAGE_SIZE_X_MAX):
+		return CALL("SetImageSize",self,c_int(x),c_int(y))
+
 	def FreeImageMem (self):
-		CALL("FreeImageMem",self,self.image,self.id)
+		return CALL("FreeImageMem",self,self.image,self.id)
+
+	def SetAllocatedImageMem(self):
+		"""
+		Set an allocated memory, that was not allocated using AllocImageMem,
+		to the driver so it can be used to store the image that will be 
+		degitized. The allocated memory must be globally locked.
+		(Basically, use this if some non-driver function happens to have
+		some memory already allocated, so you don't need to allocate more
+		memory)
+		Not Implemented!
+		"""
+	
+	def GetActiveImageMem(self):
+		"""
+		GetActiveImageMem() returns the pointer to the beginning and the
+		ID number of the active memory. If DirectDraw mode is active and
+		image memory has been allocated, this function returns the 
+		pointer and the ID of the image memory, which was activated with
+		SetImageMem(). However, it should be noted that in DirectDraw 
+		mode, this memory is not used for digitizing.
+		Also see GetImgMem().
+		Not tested!
+		"""
+		CALL('GetActiveImageMem',self,byref(self.image),byref(self.id))
+
+	def GetImageMem(self):
+		"""
+		GetImageMem() returns the pointer to the start of the active
+		image memory. In DirectDraw mode the pointer is returned to the
+		back buffer (or the visible area - DirectDraw Primary Surface
+		mode).
+		"""
+		CALL('GetImageMem',self,byref(self.image))
 		
 	def FreezeVideo(self,wait=IS_WAIT):
 		CALL("FreezeVideo",self,INT(wait))
@@ -327,15 +477,12 @@ class camera(HCAM):
 		return 
 
 	def GetError(self):
-		self.err = ctypes.c_int()
-		self.errMessage = ctypes.c_char_p()
-		return CALL("GetError",self,ctypes.byref(self.err),ctypes.byref(self.errMessage))
-		
-	def SetImageMem (self):
-		return CALL("SetImageMem",self,self.image,self.id)
-		
-	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=IS_GET_IMAGE_SIZE_X_MAX):
-		return CALL("SetImageSize",self,c_int(x),c_int(y))
+		self.err = c_int()
+		self.errMessage = c_char_p()
+		return CALL("GetError",self,byref(self.err),byref(self.errMessage))
+
+	def SaveImage(self,file):
+		return CALL('SaveImage',self,None)
 		
 	def SetImagePos(self,x=0,y=0):
 		return CALL("SetImagePos",self,c_int(x),c_int(y))
@@ -367,7 +514,7 @@ class camera(HCAM):
 		if offset + count > 64:
 			sys.stderr.write("offset + count too big, must be smaller or equal 64")
 			raise
-		buffer = ctypes.create_string_buffer(count)
+		buffer = create_string_buffer(count)
 		CALL('ReadEEPROM',self,INT(offset),buffer,INT(count))
 		return buffer.value
 
@@ -381,5 +528,5 @@ class camera(HCAM):
 		if count + offset > 64:
 			sys.stderr.write("Content to long.")
 			raise
-		pcString = ctypes.c_char_p(content)
+		pcString = c_char_p(content)
 		return CALL('WriteEEPROM',self,INT(offset),pcString,INT(count))

@@ -12,3 +12,4 @@ Mon May 30 15:52:31 BRT 2011:there are several function that returns non zero va
 Mon May 30 15:54:30 BRT 2011:one option is, use a different call function for different returns types
 Mon May 30 15:54:57 BRT 2011:other is puting a parameter in the call function informing the types of return
 Mon May 30 15:55:50 BRT 2011:another is, keeping a list of the function and which return types they have
+Mon May 30 22:06:58 BRT 2011:allocated memory is freed in ExitCamera function
