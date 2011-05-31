@@ -28,11 +28,12 @@ class Testuc480:
 		assert self.camera.SetImageMem() == 0
 
 	def test_SetImageSize(self):
-		self.camera.AllocImageMem()
-		self.camera.SetImageMem()
-		assert self.camera.SetImageSize(x = 300,y = 200) == 0
-		assert self.camera.SetImageSize(x = uc480.IS_GET_IMAGE_SIZE_X) == 300
-		assert self.camera.SetImageSize(x = uc480.IS_GET_IMAGE_SIZE_Y) == 200
+		cam = self.camera
+		cam.AllocImageMem()
+		cam.SetImageMem()
+		assert cam.SetImageSize(x = 300,y = 200) == 0
+		assert cam.SetImageSize(x = uc480.IS_GET_IMAGE_SIZE_X) == 300
+		assert cam.SetImageSize(x = uc480.IS_GET_IMAGE_SIZE_Y) == 200
 
 	def test_CaptureVideo(self):
 		self.camera.AllocImageMem()
@@ -44,6 +45,23 @@ class Testuc480:
 		self.camera.SetImageMem()
 		self.camera.CaptureVideo() 
 		assert self.camera.StopLiveVideo() == 0
+
+	def test_GetError(self):
+		try:
+			self.camera.CaptureVideo()
+		except Exception:
+			self.camera.GetError()
+			error_message = self.camera.error_message.value 
+		assert error_message == "There is no activated image memory"
+
+	def test_CopyImageMem(self):
+		import numpy 
+		self.camera.AllocImageMem()
+		self.camera.SetImageMem()
+		self.camera.CaptureVideo(uc480.IS_WAIT) 
+		self.camera.StopLiveVideo(uc480.IS_WAIT)
+		assert self.camera.CopyImageMem() == 0
+		assert numpy.sum(self.camera.data) > 0
 
 def test_init():
 	camera = uc480.camera()

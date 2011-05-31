@@ -191,7 +191,7 @@ class camera(HCAM):
 		self.width = 1024
 		self.height = 768		
 		self.seq = 0
-		self.data = np.zeros((self.height,self.width),dtype=np.int8)
+		self.data = np.zeros((self.height,self.width),dtype=np.uint8)
 		return None
 
 	def AddToSequence(self):
@@ -424,17 +424,23 @@ class camera(HCAM):
 		CALL("FreezeVideo",self,INT(wait))
 		
 	def CopyImageMem(self):
+		"""
+		CopyImageMem() copies the contents of the image memory, as
+		described is pcSource and nID to the area in memory, which 
+		pcDest points to.  
+		"""
 		r = CALL("CopyImageMem",self,self.image,self.id,self.data.ctypes.data)
-		if r == -1:
+		if r is not SUCCESS:
 			self.GetError()
-			sys.stderr.write(self.err)
-			sys.stderr.write(self.errMessage.value)
-		return 
+			raise Exception(self.error_message.value)
+		return r
 
 	def GetError(self):
-		self.err = INT()
-		self.errMessage = c_char_p()
-		return CALL("GetError",self,byref(self.err),byref(self.errMessage))
+		self.error = INT()
+		self.error_message = c_char_p()
+		return CALL("GetError",self,
+			byref(self.error),
+			byref(self.error_message))
 
 	def SaveImage(self,file):
 		return CALL('SaveImage',self,None)
@@ -465,7 +471,11 @@ class camera(HCAM):
 				becomes equal to 10.
 		(Exp.: Wait = 100 => wait 1 sec.)
 		"""
-		return CALL("CaptureVideo",self,INT(wait))
+		r = CALL("CaptureVideo",self,INT(wait))
+		if r is not SUCCESS:
+			self.GetError()
+			raise Exception(self.error_message.value)
+		return r
 		
 	def SetColorMode(self,color_mode=IS_SET_CM_Y8):
 		return CALL("SetColorMode",self,INT(color_mode))
