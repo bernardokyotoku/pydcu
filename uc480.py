@@ -351,7 +351,7 @@ class camera(HCAM):
 		CALL('GetNumberOfMemoryImages',self,INT(self.seq),byref(number))
 		return number.value
 	
-	def SetImageMem (self):
+	def SetImageMem(self):
 		"""
 		SetImageMem() sets the allocated image memory to active memory.
 		Only an active image memory can receive image data. After 
@@ -362,6 +362,20 @@ class camera(HCAM):
 		return CALL("SetImageMem",self,self.image,self.id)
 		
 	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=IS_GET_IMAGE_SIZE_X_MAX):
+		"""
+		Sets the image size.
+
+		If x is configure to:
+		IS_GET_IMAGE_SIZE_X     Retrieval of current width
+		IS_GET_IMAGE_SIZE_X_MIN Smallest value for the AOI width
+		IS_GET_IMAGE_SIZE_X_MAX Largest value for the AOI width
+		IS_GET_IMAGE_SIZE_X_INC Increment for the AOI width
+		IS_GET_IMAGE_SIZE_Y     Retrieval of current height
+		IS_GET_IMAGE_SIZE_Y_MIN Smallest value for the AOI height
+		IS_GET_IMAGE_SIZE_Y_MAX Largest value for the AOI height
+		IS_GET_IMAGE_SIZE_Y_INC Increment for the AOI height
+		y is ignored and the specified size is returned.
+		"""
 		return CALL("SetImageSize",self,INT(x),INT(y))
 
 	def FreeImageMem (self):
