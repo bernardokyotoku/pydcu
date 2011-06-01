@@ -221,7 +221,7 @@ class camera(HCAM):
 		"""
 		Not tested!
 		"""
-		CALL('LockSeqBuf',self,INT(number),self.image)
+		return CALL('LockSeqBuf',self,INT(number),self.image)
 
 	def UnlockSeqBuf(self,number):
 		"""
