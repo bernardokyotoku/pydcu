@@ -360,8 +360,11 @@ class camera(HCAM):
 		Not tested!
 
 		"""
-		number = ctype.INT()
-		CALL('GetNumberOfMemoryImages',self,INT(self.seq),byref(number))
+		number = INT()
+		r = CALL('GetNumberOfMemoryImages',self,INT(self.seq),byref(number))
+		if r is not SUCCESS:
+			self.GetError()
+			raise Exception(self.error_message.value)
 		return number.value
 	
 	def SetImageMem(self):

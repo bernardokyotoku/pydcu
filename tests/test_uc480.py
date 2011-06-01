@@ -103,6 +103,11 @@ class Testuc480:
 		self.camera.AddToSequence()
 		assert self.camera.GetActSeqBuf() == 0
 
+	def test_GetNumberOfMemoryImages(self):
+		self.camera.AllocImageMem()
+		self.camera.SetImageMem()
+		self.camera.AddToSequence()
+		assert self.camera.GetNumberOfMemoryImages() == 0
 
 def test_init():
 	camera = uc480.camera()
