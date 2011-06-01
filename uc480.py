@@ -229,7 +229,7 @@ class camera(HCAM):
 		locked image memory. The image memory is put to the previous 
 		position in the sequence list.
 		"""
-		CALL('UnlockSeqBuf',self,INT(number),self.image)
+		return CALL('UnlockSeqBuf',self,INT(number),self.image)
 
 	def GetLastMemorySequence(self):
 		"""

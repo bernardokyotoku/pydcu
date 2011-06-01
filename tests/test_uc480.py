@@ -85,6 +85,10 @@ class Testuc480:
 		self.camera.AddToSequence()
 		assert self.camera.LockSeqBuf(1) == 0
 
+	def test_UnlockSeqBuf(self):
+		self.camera.AllocImageMem()
+		assert self.camera.UnlockSeqBuf(1) == 0
+		#test with number = 0 done
 
 def test_init():
 	camera = uc480.camera()
