@@ -109,6 +109,9 @@ class Testuc480:
 		self.camera.AddToSequence()
 		assert self.camera.GetNumberOfMemoryImages() == 0
 
+	def test_SetAllocatedImageMem(self):
+		assert self.camera.SetAllocatedImageMem() == 0
+
 def test_init():
 	camera = uc480.camera()
 	camera.ExitCamera()

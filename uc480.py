@@ -405,15 +405,26 @@ class camera(HCAM):
 
 	def SetAllocatedImageMem(self):
 		"""
-		Set an allocated memory, that was not allocated using AllocImageMem,
-		to the driver so it can be used to store the image that will be 
-		degitized. The allocated memory must be globally locked.
+		Set an allocated memory, that was not allocated using 
+		AllocImageMem, to the driver so it can be used to store the 
+		image that will be degitized. The allocated memory must be 
+		globally locked.
 		(Basically, use this if some non-driver function happens to have
 		some memory already allocated, so you don't need to allocate more
 		memory)
 		Not Implemented!
 		"""
-	
+		r = CALL('SetAllocatedImageMem',self,
+			INT(width),
+			INT(height),
+			INT(bitpixel),
+			byref(self.image),
+			byref(self.id))
+			self.GetError()
+		if r is not SUCCESS:
+			raise Exception(self.error_message.value)
+		return r
+		
 	def GetActiveImageMem(self):
 		"""
 		GetActiveImageMem() returns the pointer to the beginning and the
