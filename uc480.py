@@ -194,6 +194,18 @@ class camera(HCAM):
 		self.data = np.zeros((self.height,self.width),dtype=np.uint8)
 		return None
 
+	def CheckForSuccessError(self,return_value):
+		if return_value is not SUCCESS:
+			self.GetError()
+			raise Exception(self.error_message.value)
+		return SUCCESS
+
+	def CheckForNoSuccessError(self,return_value):
+		if return_value is NO_SUCCESS:
+			self.GetError()
+			raise Exception(self.error_message.value)
+		return return_value
+
 	def AddToSequence(self):
 		"""
 		AddToSequence() inserts image memory into the image memory list,
@@ -204,7 +216,8 @@ class camera(HCAM):
 		sequence (nID) is limited to the integer value range.  
 		"""
 		self.seq += 1
-		return CALL('AddToSequence',self,self.image,self.id) 
+		r = CALL('AddToSequence',self,self.image,self.id) 
+		return self.CheckForSuccessError(r)
 
 	def ClearSequence(self):
 		"""
@@ -215,7 +228,8 @@ class camera(HCAM):
 		executed.
 		Not tested!
 		"""
-		return CALL('ClearSequence',self)
+		r = CALL('ClearSequence',self)
+		return self.CheckForSuccessError(r)
 			
 	def LockSeqBuf(self,number):
 		"""
@@ -227,7 +241,8 @@ class camera(HCAM):
 		access the image memory use function UnlockSeqBuf().
 		Not tested!
 		"""
-		return CALL('LockSeqBuf',self,INT(number),self.image)
+		r = CALL('LockSeqBuf',self,INT(number),self.image)
+		return self.CheckForSuccessError(r)
 
 	def UnlockSeqBuf(self,number):
 		"""
@@ -235,7 +250,8 @@ class camera(HCAM):
 		locked image memory. The image memory is put to the previous 
 		position in the sequence list.
 		"""
-		return CALL('UnlockSeqBuf',self,INT(number),self.image)
+		r = CALL('UnlockSeqBuf',self,INT(number),self.image)
+		return self.CheckForSuccessError(r)
 
 	def GetLastMemorySequence(self):
 		"""
@@ -246,10 +262,7 @@ class camera(HCAM):
 		No memory board to test this, Not tested!
 		"""
 		r = CALL('GetLastMemorySequence',self,byref(self.id))
-		if r is not SUCCESS:
-			self.GetError()
-			raise Exception(self.error_message.value)
-		return r
+		return self.CheckForSuccessError(r)
 
 	def TransferImage():
 		"""
@@ -303,11 +316,7 @@ class camera(HCAM):
 		ppcMem = byref(pcMem)
 		ppcMemLast = byref(pcMemLast)
 		r = CALL('GetActSeqBuf',self,paqID,ppcMem,ppcMemLast)
-		if r is not SUCCESS:
-			self.GetError()
-			raise Exception(self.error_message.value)
-		return r
-
+		return self.CheckForSuccessError(r)
 		
 	def AllocImageMem(self,width=1024,height=768,bitpixel=8):
 		"""
@@ -344,12 +353,13 @@ class camera(HCAM):
 		"""
 		self.image = c_char_p()
 		self.id = INT()
-		return CALL('AllocImageMem',self,
+		r =  CALL('AllocImageMem',self,
 			INT(width),
 			INT(height),
 			INT(bitpixel),
 			byref(self.image),
 			byref(self.id))
+		return self.CheckForSuccessError(r)
 
 	def GetNumberOfMemoryImages(self):
 		"""
@@ -362,10 +372,7 @@ class camera(HCAM):
 		"""
 		number = INT()
 		r = CALL('GetNumberOfMemoryImages',self,INT(self.seq),byref(number))
-		if r is not SUCCESS:
-			self.GetError()
-			raise Exception(self.error_message.value)
-		return number.value
+		return self.CheckForSuccessError(r)
 	
 	def SetImageMem(self):
 		"""
@@ -375,9 +382,10 @@ class camera(HCAM):
 		the image size of the active memory. A pointer from function
 		AllocImgMem() has to be given to parameter pcImgMem.
 		"""
-		return CALL("SetImageMem",self,self.image,self.id)
+		r = CALL("SetImageMem",self,self.image,self.id)
+		return self.CheckForSuccessError(r)
 		
-	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=IS_GET_IMAGE_SIZE_X_MAX):
+	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=0):#non-zero ret
 		"""
 		Sets the image size.
 
@@ -392,7 +400,8 @@ class camera(HCAM):
 		IS_GET_IMAGE_SIZE_Y_INC Increment for the AOI height
 		y is ignored and the specified size is returned.
 		"""
-		return CALL("SetImageSize",self,INT(x),INT(y))
+		r = CALL("SetImageSize",self,INT(x),INT(y))
+		return self.CheckForNoSuccessError(r)
 
 	def FreeImageMem (self):
 		"""
@@ -401,7 +410,8 @@ class camera(HCAM):
 		used. All other pointers lead to an error message! The repeated
 		handing over of the same pointers also leads to an error message
 		"""
-		return CALL("FreeImageMem",self,self.image,self.id)
+		r = CALL("FreeImageMem",self,self.image,self.id)
+		return self.CheckForSuccessError(r)
 
 	def SetAllocatedImageMem(self,width=1024,height=768,bitpixel=8):
 		"""
@@ -422,10 +432,7 @@ class camera(HCAM):
 			INT(bitpixel),
 			self.data.ctypes.data,
 			byref(self.id))
-		if r is not SUCCESS:
-			self.GetError()
-			raise Exception(self.error_message.value)
-		return r
+		return self.CheckForSuccessError(r)
 		
 	def GetActiveImageMem(self):
 		"""
@@ -459,10 +466,7 @@ class camera(HCAM):
 		pcDest points to.  
 		"""
 		r = CALL("CopyImageMem",self,self.image,self.id,self.data.ctypes.data)
-		if r is not SUCCESS:
-			self.GetError()
-			raise Exception(self.error_message.value)
-		return r
+		return self.CheckForSuccessError(r)
 
 	def GetError(self):
 		self.error = INT()
@@ -472,10 +476,12 @@ class camera(HCAM):
 			byref(self.error_message))
 
 	def SaveImage(self,file):
-		return CALL('SaveImage',self,None)
+		r = CALL('SaveImage',self,None)
+		return self.CheckForSuccessError(r)
 		
 	def SetImagePos(self,x=0,y=0):
-		return CALL("SetImagePos",self,INT(x),INT(y))
+		r = CALL("SetImagePos",self,INT(x),INT(y))
+		return self.CheckForNoSuccessError(r)
 		
 	def CaptureVideo(self,wait=IS_DONT_WAIT):
 		"""
@@ -501,16 +507,15 @@ class camera(HCAM):
 		(Exp.: Wait = 100 => wait 1 sec.)
 		"""
 		r = CALL("CaptureVideo",self,INT(wait))
-		if r is not SUCCESS:
-			self.GetError()
-			raise Exception(self.error_message.value)
-		return r
+		return self.CheckForSuccessError(r)
 		
 	def SetColorMode(self,color_mode=IS_SET_CM_Y8):
-		return CALL("SetColorMode",self,INT(color_mode))
+		r = CALL("SetColorMode",self,INT(color_mode))
+		return self.CheckForNoSuccessError(r)
 	
 	def SetSubSampling(self,mode=IS_SUBSAMPLING_DISABLE):
-		return CALL("SetSubSampling",self,INT(mode))
+		r = CALL("SetSubSampling",self,INT(mode))
+		return self.CheckForSuccessError(r)
 		
 	def StopLiveVideo(self,wait=IS_DONT_WAIT):
 		"""
@@ -525,10 +530,12 @@ class camera(HCAM):
 		is started with FreezeVideo(IS_DONT_WAIT) can be terminated
 		immediately.
 		"""
-		return CALL("StopLiveVideo",self,INT(wait))
+		r = CALL("StopLiveVideo",self,INT(wait))
+		return self.CheckForSuccessError(r)
 		
 	def ExitCamera (self):
-		return CALL("ExitCamera",self)
+		r = CALL("ExitCamera",self)
+		return self.CheckForSuccessError(r)
 	
 
 	def ReadEEPROM(self,offset = 0, count = 64):
@@ -556,4 +563,5 @@ class camera(HCAM):
 		if count + offset > 64:
 			raise Exception("Content to long")
 		pcString = c_char_p(content)
-		return CALL('WriteEEPROM',self,INT(offset),pcString,INT(count))
+		r = CALL('WriteEEPROM',self,INT(offset),pcString,INT(count))
+		return self.CheckForSuccessError(r)
