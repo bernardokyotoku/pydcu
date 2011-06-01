@@ -215,7 +215,7 @@ class camera(HCAM):
 		executed.
 		Not tested!
 		"""
-		return CALL('CleaSequence',self)
+		return CALL('ClearSequence',self)
 			
 	def LockSeqBuf(self,number):
 		"""

@@ -67,6 +67,19 @@ class Testuc480:
 		self.camera.AllocImageMem()
 		assert self.camera.AddToSequence() == 0
 
+	def test_CopyImageMem_from_Sequence(self):
+		import numpy 
+		self.camera.AllocImageMem()
+		self.camera.AddToSequence()
+		self.camera.SetImageMem()
+		self.camera.CaptureVideo(uc480.IS_WAIT) 
+		self.camera.StopLiveVideo(uc480.IS_WAIT)
+		assert self.camera.CopyImageMem() == 0
+		assert numpy.sum(self.camera.data) > 0
+
+	def test_ClearSequence(self):
+		assert self.camera.ClearSequence() == 0
+
 
 def test_init():
 	camera = uc480.camera()
