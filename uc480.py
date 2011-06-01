@@ -371,8 +371,8 @@ class camera(HCAM):
 		"""
 		SetImageMem() sets the allocated image memory to active memory.
 		Only an active image memory can receive image data. After 
-		calling SetImageMem() function is_SetImageSize() must follow to
-		set the image size of the active memory. A pointer from function
+		calling SetImageMem() function SetImageSize() must follow to set
+		the image size of the active memory. A pointer from function
 		AllocImgMem() has to be given to parameter pcImgMem.
 		"""
 		return CALL("SetImageMem",self,self.image,self.id)
@@ -403,7 +403,7 @@ class camera(HCAM):
 		"""
 		return CALL("FreeImageMem",self,self.image,self.id)
 
-	def SetAllocatedImageMem(self):
+	def SetAllocatedImageMem(self,width=1024,height=768,bitpixel=8):
 		"""
 		Set an allocated memory, that was not allocated using 
 		AllocImageMem, to the driver so it can be used to store the 
@@ -414,14 +414,16 @@ class camera(HCAM):
 		memory)
 		Not Implemented!
 		"""
+		self.image = self.data.ctypes.data_as(c_char_p)
+		self.id = INT()
 		r = CALL('SetAllocatedImageMem',self,
 			INT(width),
 			INT(height),
 			INT(bitpixel),
-			byref(self.image),
+			self.data.ctypes.data,
 			byref(self.id))
-			self.GetError()
 		if r is not SUCCESS:
+			self.GetError()
 			raise Exception(self.error_message.value)
 		return r
 		

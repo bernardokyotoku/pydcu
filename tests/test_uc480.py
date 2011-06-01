@@ -112,6 +112,14 @@ class Testuc480:
 	def test_SetAllocatedImageMem(self):
 		assert self.camera.SetAllocatedImageMem() == 0
 
+	def test_SetAllocatedImageMem_captures(self):
+		import numpy
+		self.camera.SetAllocatedImageMem()
+		self.camera.SetImageMem()
+		self.camera.CaptureVideo(uc480.IS_WAIT) 
+		self.camera.StopLiveVideo(uc480.IS_WAIT)
+		assert numpy.sum(self.camera.data) > 0
+
 def test_init():
 	camera = uc480.camera()
 	camera.ExitCamera()
