@@ -90,6 +90,20 @@ class Testuc480:
 		assert self.camera.UnlockSeqBuf(1) == 0
 		#test with number = 0 done
 
+	def test_GetLastMemorySequence(self):
+		self.camera.AllocImageMem()
+		self.camera.SetImageMem()
+		self.camera.AddToSequence()
+		self.camera.CaptureVideo(uc480.IS_WAIT) 
+		self.camera.StopLiveVideo(uc480.IS_WAIT)
+		assert self.camera.GetLastMemorySequence() == 0
+
+	def test_GetActSeqBuf(self):
+		self.camera.AllocImageMem()
+		self.camera.AddToSequence()
+		assert self.camera.GetActSeqBuf() == 0
+
+
 def test_init():
 	camera = uc480.camera()
 	camera.ExitCamera()

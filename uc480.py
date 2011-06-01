@@ -173,12 +173,12 @@ def CALL(name, *args):
 			new_args.append (str (a))
 		else:
 			new_args.append (a)
-	r = func(*new_args) 
-	if r is NO_SUCCESS:
-		raise Exception("NO_SUCCESS")
-	elif r is INVALID_HANDLER:
-		raise Exception("INVALID_HANDLER")
-	return r
+	return func(*new_args) 
+#	if r is NO_SUCCESS:
+#		raise Exception("NO_SUCCESS")
+#	elif r is INVALID_HANDLER:
+#		raise Exception("INVALID_HANDLER")
+#	return r
 
 class camera(HCAM):
 	def __init__(self,camera_id=0):
@@ -219,6 +219,12 @@ class camera(HCAM):
 			
 	def LockSeqBuf(self,number):
 		"""
+		LockSeqBuf() can be used to disable the overwriting of the image
+		memory with new image data. And thus it is possible to prevent
+		images which are required for further processing from being 
+		overwritten. Full access to the image memory is still available.
+		Only one image memory can be disabled at the same time. To 
+		access the image memory use function UnlockSeqBuf().
 		Not tested!
 		"""
 		return CALL('LockSeqBuf',self,INT(number),self.image)
@@ -237,10 +243,13 @@ class camera(HCAM):
 		recorded sequence in the memory board. This parameter can then 
 		be used in combination with the function TransferImage() to read
 		images out of the camera memory.
-		Not tested!
+		No memory board to test this, Not tested!
 		"""
-
-		CALL('GetLastMemorySequence',self,self.id)
+		r = CALL('GetLastMemorySequence',self,byref(self.id))
+		if r is not SUCCESS:
+			self.GetError()
+			raise Exception(self.error_message.value)
+		return r
 
 	def TransferImage():
 		"""
@@ -286,14 +295,19 @@ class camera(HCAM):
 		sition is currently taking place. The number is not the ID of 
 		the image memory which is provided from AllocImageMem(), but the
 		running number in the sequence as defined in AddToSequence().
-		Not tested!
 		"""
 		aqID = INT()
 		pcMem = c_char_p()
 		pcMemLast = c_char_p()
+		paqID = byref(aqID)
 		ppcMem = byref(pcMem)
 		ppcMemLast = byref(pcMemLast)
-		CALL('GetActSeqBuf',self,byref(aqID,ppcMem,ppcMemLast))
+		r = CALL('GetActSeqBuf',self,paqID,ppcMem,ppcMemLast)
+		if r is not SUCCESS:
+			self.GetError()
+			raise Exception(self.error_message.value)
+		return r
+
 		
 	def AllocImageMem(self,width=1024,height=768,bitpixel=8):
 		"""
