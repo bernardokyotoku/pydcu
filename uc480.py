@@ -29,61 +29,6 @@ if lib is None:
 
 		
 libuc480 = cdll.LoadLibrary(lib)
-if libuc480 is not None:
-	uc480_h_name = 'uc480_h'
-	try:
-		uc480_h = "uc480_h"
-		#from uc480_h import *
-		#exec 'from %s import *' % (uc480_h_name)
-	except ImportError:
-		uc480_h = None
-	if uc480_h is None:
-		assert os.path.isfile (include_uc480_h), `include_uc480_h`
-		d = {}
-		l = ['# This file is auto-generated. Do not edit!']
-		error_map = {}
-		f = open (include_uc480_h, 'r')
-		
-		def is_number(s):
-			try:
-				float(s)
-				return True
-			except ValueError:
-				return False
-				
-		for line in f.readlines():
-			if not line.startswith('#define'): continue
-			i = line.find('//')
-			words = line[7:i].strip().split(None, 2)
-			if len (words)!=2: continue
-			name, value = words
-			if value.startswith('0x'):
-				exec '%s = %s' % (name, value)
-				d[name] = eval(value)
-				l.append('%s = %s' % (name, value))
-			elif is_number(value):
-				d[name] = eval(value)
-				l.append('%s = %s' % (name, value))
-			elif value.startswith('UC'):
-				print value
-				d[name] = unicode(value[3:-1])
-				l.append('%s = unicode("%s")' % (name, value[3:-1]))
-			elif d.has_key(value):
-				d[name] = d[value]
-				l.append('%s = %s' % (name, d[value]))
-			else:
-				d[name] = value
-				l.append('%s = %s' % (name, value))
-				pass
-		l.append('error_map = %r' % (error_map))
-		fn = os.path.join (os.path.dirname(os.path.abspath (__file__)), uc480_h_name+'.py')
-		print 'Generating %r' % (fn)
-		f = open(fn, 'w')
-		f.write ('\n'.join(l) + '\n')
-		f.close()
-		print 'Please upload generated file %r to http://code.google.com/p/pylibuc480/issues' % (fn)
-	else:
-		pass
 
 
 def CALL(name, *args):
@@ -100,11 +45,6 @@ def CALL(name, *args):
 		else:
 			new_args.append (a)
 	return func(*new_args) 
-#	if r is NO_SUCCESS:
-#		raise Exception("NO_SUCCESS")
-#	elif r is INVALID_HANDLER:
-#		raise Exception("INVALID_HANDLER")
-#	return r
 
 class camera(HCAM):
 	def __init__(self,camera_id=0):
