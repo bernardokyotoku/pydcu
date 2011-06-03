@@ -1,10 +1,8 @@
 import os
 import sys
 import textwrap
-import numpy as np
-from numpy import ctypeslib
+from numpy import zeros,uint8,ctypeslib
 from ctypes import byref,c_int,create_string_buffer,c_char_p,cdll,util,c_void_p
-import warnings
 import IS
 
 SUCCESS = 0
@@ -44,9 +42,60 @@ def CALL(name, *args):
 			new_args.append (a)
 	return func(*new_args) 
 
+
+
+
+class image(object):
+	def __init__(self,camera):
+		self.cam = camera
+
+	@property
+	def size(self):
+		height = self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_X)
+		width =  self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_Y)
+		return (width,height)
+
+	@size.setter
+	def size(self,value):
+		if len(value) != 2:
+			raise Exception ("Value len not equal 2.")
+		(width,height) = value
+		if width is None:
+			width =  self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_X)
+		if height is None:
+			height = self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_Y)
+		self.cam.SetImageSize(x=width,y=height)
+
+	@property
+	def position(self):
+		y = self.cam.SetImagePos(IS.GET_IMAGE_POS_X)
+		x =  self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
+		return (x,y)
+	
+	@position.setter
+	def position(self,value):
+		if len(value) != 2:
+			raise Exception ("Value len not equal 2.")
+		(x,y) = value
+		if x is None:
+			x =  self.cam.SetImagePos(IS.GET_IMAGE_POS_X)
+		if y is None:
+			y = self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
+		self.cam.SetImagePos(x,y)
+
+class pycam:
+	def __init__(self,camera_id = 0):
+		self.cam = camera(camera_id)
+		self.image = image(self.cam)
+
+	def __del__(self):
+		self.cam.ExitCamera()
+
+	def take_snapshot(self):
+		pass
+
 class camera(HCAM):
 	def __init__(self,camera_id=0):
-		#self.id = camera_id
 		HCAM.__init__(self,0)
 		r = CALL('InitCamera',byref(self),HWND(0))
 		if r is not SUCCESS:
@@ -54,7 +103,7 @@ class camera(HCAM):
 		self.width = 1024
 		self.height = 768		
 		self.seq = 0
-		self.data = np.zeros((self.height,self.width),dtype=np.uint8)
+		self.data = zeros((self.height,self.width),dtype=uint8)
 		return None
 
 	def CheckForSuccessError(self,return_value):
@@ -264,7 +313,10 @@ class camera(HCAM):
 		y is ignored and the specified size is returned.
 		"""
 		r = CALL("SetImageSize",self,INT(x),INT(y))
-		return self.CheckForNoSuccessError(r)
+		if x & 0x8000 == 0x8000:
+			return self.CheckForNoSuccessError(r)
+		return self.CheckForSuccessError(r)
+		
 
 	def FreeImageMem (self):
 		"""
@@ -344,7 +396,9 @@ class camera(HCAM):
 		
 	def SetImagePos(self,x=0,y=0):
 		r = CALL("SetImagePos",self,INT(x),INT(y))
-		return self.CheckForNoSuccessError(r)
+		if x & 0x8000 == 0x8000:
+			return self.CheckForNoSuccessError(r)
+		return self.CheckForSuccessError(r)
 		
 	def CaptureVideo(self,wait=IS.DONT_WAIT):
 		"""
