@@ -32,8 +32,8 @@ class Testuc480:
 		cam.AllocImageMem()
 		cam.SetImageMem()
 		assert cam.SetImageSize(x = 300,y = 200) == 0
-		assert cam.SetImageSize(x = uc480.IS_GET_IMAGE_SIZE_X) == 300
-		assert cam.SetImageSize(x = uc480.IS_GET_IMAGE_SIZE_Y) == 200
+		assert cam.SetImageSize(x = uc480.IS.GET_IMAGE_SIZE_X) == 300
+		assert cam.SetImageSize(x = uc480.IS.GET_IMAGE_SIZE_Y) == 200
 
 	def test_CaptureVideo(self):
 		self.camera.AllocImageMem()
@@ -58,8 +58,8 @@ class Testuc480:
 		import numpy 
 		self.camera.AllocImageMem()
 		self.camera.SetImageMem()
-		self.camera.CaptureVideo(uc480.IS_WAIT) 
-		self.camera.StopLiveVideo(uc480.IS_WAIT)
+		self.camera.CaptureVideo(uc480.IS.WAIT) 
+		self.camera.StopLiveVideo(uc480.IS.WAIT)
 		assert self.camera.CopyImageMem() == 0
 		assert numpy.sum(self.camera.data) > 0
 
@@ -72,8 +72,8 @@ class Testuc480:
 		self.camera.AllocImageMem()
 		self.camera.AddToSequence()
 		self.camera.SetImageMem()
-		self.camera.CaptureVideo(uc480.IS_WAIT) 
-		self.camera.StopLiveVideo(uc480.IS_WAIT)
+		self.camera.CaptureVideo(uc480.IS.WAIT) 
+		self.camera.StopLiveVideo(uc480.IS.WAIT)
 		assert self.camera.CopyImageMem() == 0
 		assert numpy.sum(self.camera.data) > 0
 
@@ -94,8 +94,8 @@ class Testuc480:
 #		self.camera.AllocImageMem()
 #		self.camera.SetImageMem()
 #		self.camera.AddToSequence()
-#		self.camera.CaptureVideo(uc480.IS_WAIT) 
-#		self.camera.StopLiveVideo(uc480.IS_WAIT)
+#		self.camera.CaptureVideo(uc480.IS.WAIT) 
+#		self.camera.StopLiveVideo(uc480.IS.WAIT)
 #		assert self.camera.GetLastMemorySequence() == 0
 
 	def test_GetActSeqBuf(self):
@@ -116,8 +116,8 @@ class Testuc480:
 		import numpy
 		self.camera.SetAllocatedImageMem()
 		self.camera.SetImageMem()
-		self.camera.CaptureVideo(uc480.IS_WAIT) 
-		self.camera.StopLiveVideo(uc480.IS_WAIT)
+		self.camera.CaptureVideo(uc480.IS.WAIT) 
+		self.camera.StopLiveVideo(uc480.IS.WAIT)
 		assert numpy.sum(self.camera.data) > 0
 
 def test_init():

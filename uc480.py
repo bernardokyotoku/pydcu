@@ -5,9 +5,7 @@ import numpy as np
 from numpy import ctypeslib
 from ctypes import byref,c_int,create_string_buffer,c_char_p,cdll,util,c_void_p
 import warnings
-import symbols as sym
-
-from uc480_h import *
+import IS
 
 SUCCESS = 0
 NO_SUCCESS = -1
@@ -52,8 +50,7 @@ class camera(HCAM):
 		HCAM.__init__(self,0)
 		r = CALL('InitCamera',byref(self),HWND(0))
 		if r is not SUCCESS:
-			sys.stderr.write(sym.ERROR_CODE[r])
-			raise
+			raise Exception("Error %d"%r)
 		self.width = 1024
 		self.height = 768		
 		self.seq = 0
@@ -251,19 +248,19 @@ class camera(HCAM):
 		r = CALL("SetImageMem",self,self.image,self.id)
 		return self.CheckForSuccessError(r)
 		
-	def SetImageSize(self,x=IS_GET_IMAGE_SIZE_X_MAX,y=0):#non-zero ret
+	def SetImageSize(self,x=IS.GET_IMAGE_SIZE_X_MAX,y=0):#non-zero ret
 		"""
 		Sets the image size.
 
 		If x is configure to:
-		IS_GET_IMAGE_SIZE_X     Retrieval of current width
-		IS_GET_IMAGE_SIZE_X_MIN Smallest value for the AOI width
-		IS_GET_IMAGE_SIZE_X_MAX Largest value for the AOI width
-		IS_GET_IMAGE_SIZE_X_INC Increment for the AOI width
-		IS_GET_IMAGE_SIZE_Y     Retrieval of current height
-		IS_GET_IMAGE_SIZE_Y_MIN Smallest value for the AOI height
-		IS_GET_IMAGE_SIZE_Y_MAX Largest value for the AOI height
-		IS_GET_IMAGE_SIZE_Y_INC Increment for the AOI height
+		IS.GET_IMAGE_SIZE_X     Retrieval of current width
+		IS.GET_IMAGE_SIZE_X_MIN Smallest value for the AOI width
+		IS.GET_IMAGE_SIZE_X_MAX Largest value for the AOI width
+		IS.GET_IMAGE_SIZE_X_INC Increment for the AOI width
+		IS.GET_IMAGE_SIZE_Y     Retrieval of current height
+		IS.GET_IMAGE_SIZE_Y_MIN Smallest value for the AOI height
+		IS.GET_IMAGE_SIZE_Y_MAX Largest value for the AOI height
+		IS.GET_IMAGE_SIZE_Y_INC Increment for the AOI height
 		y is ignored and the specified size is returned.
 		"""
 		r = CALL("SetImageSize",self,INT(x),INT(y))
@@ -322,7 +319,7 @@ class camera(HCAM):
 		"""
 		CALL('GetImageMem',self,byref(self.image))
 		
-	def FreezeVideo(self,wait=IS_WAIT):
+	def FreezeVideo(self,wait=IS.WAIT):
 		CALL("FreezeVideo",self,INT(wait))
 		
 	def CopyImageMem(self):
@@ -349,7 +346,7 @@ class camera(HCAM):
 		r = CALL("SetImagePos",self,INT(x),INT(y))
 		return self.CheckForNoSuccessError(r)
 		
-	def CaptureVideo(self,wait=IS_DONT_WAIT):
+	def CaptureVideo(self,wait=IS.DONT_WAIT):
 		"""
 		CaptureVideo() digitizes video images in real time and transfers
 		the images to the previously allocated image memory. 
@@ -362,8 +359,8 @@ class camera(HCAM):
 		image memeories added to the sequence.
 
 		wait
-	 	IS_DONT_WAIT	This function synchronizes the image acquisition				of the V-SYNC, but returns immediately.
-		IS_WAIT		This function synchronizes the image acquisition
+	 	IS.DONT_WAIT	This function synchronizes the image acquisition				of the V-SYNC, but returns immediately.
+		IS.WAIT		This function synchronizes the image acquisition
 				of the V-SYNC and only then does return (i.e.
 				waits until image acquisition begins)
 		10<wait<32768	Wait time in 10 ms steps. A maximum of 327.68 
@@ -375,15 +372,15 @@ class camera(HCAM):
 		r = CALL("CaptureVideo",self,INT(wait))
 		return self.CheckForSuccessError(r)
 		
-	def SetColorMode(self,color_mode=IS_SET_CM_Y8):
+	def SetColorMode(self,color_mode=IS.SET_CM_Y8):
 		r = CALL("SetColorMode",self,INT(color_mode))
 		return self.CheckForNoSuccessError(r)
 	
-	def SetSubSampling(self,mode=IS_SUBSAMPLING_DISABLE):
+	def SetSubSampling(self,mode=IS.SUBSAMPLING_DISABLE):
 		r = CALL("SetSubSampling",self,INT(mode))
 		return self.CheckForSuccessError(r)
 		
-	def StopLiveVideo(self,wait=IS_DONT_WAIT):
+	def StopLiveVideo(self,wait=IS.DONT_WAIT):
 		"""
 		The StopLiveVideo() function freezes the image in the VGA card 
 		or in the PC's system memory. The function is controlled with 
@@ -392,8 +389,8 @@ class camera(HCAM):
 		and grabs the image in the background. In the second mode the 
 		function waits until the image has been completely acquired and
 		only then does the function return.
-		By the use of IS_FORCE_VIDEO_STOP a single frame recording which
-		is started with FreezeVideo(IS_DONT_WAIT) can be terminated
+		By the use of IS.FORCE_VIDEO_STOP a single frame recording which
+		is started with FreezeVideo(IS.DONT_WAIT) can be terminated
 		immediately.
 		"""
 		r = CALL("StopLiveVideo",self,INT(wait))
