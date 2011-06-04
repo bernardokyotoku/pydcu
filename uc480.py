@@ -42,31 +42,36 @@ def CALL(name, *args):
 			new_args.append (a)
 	return func(*new_args) 
 
+def pair_gen(getXconst,getYconst):
+	class pair(list):
+		def __init__(self,args,camera):
+			list.__init__(self,args)
+			self.cam = camera
+		
+		@property
+		def x(self):
+			return self[0]
 
-class pair(list):
-	def __init__(self,args,camera):
-		list.__init__(self,args)
-		self.cam = camera
+		@x.setter
+		def x(self,value):
+			self[0] = value
+			y = self.cam.SetImagePos(getYconst)
+			self.cam.SetImagePos(value,y)
+
+		@property
+		def y(self):
+			return self[1]
+
+		@y.setter
+		def y(self,value):
+			self[1] = value
+			x = self.cam.SetImagePos(getXconst)
+			self.cam.SetImagePos(x,value)
 	
-	@property
-	def x(self):
-		return self[0]
+	return pair
 
-	@x.setter
-	def x(self,value):
-		self[0] = value
-		y = self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
-		self.cam.SetImagePos(value,y)
-
-	@property
-	def y(self):
-		return self[1]
-
-	@y.setter
-	def y(self,value):
-		self[1] = value
-		x = self.cam.SetImagePos(IS.GET_IMAGE_POS_X)
-		self.cam.SetImagePos(x,value)
+pos_pair = pair_gen(IS.GET_IMAGE_POS_X,IS.GET_IMAGE_POS_Y)
+size_pair = pair_gen(IS.GET_IMAGE_SIZE_X,IS.GET_IMAGE_SIZE_Y)
 
 class image(object):
 	def __init__(self,camera):
@@ -76,7 +81,7 @@ class image(object):
 	def size(self):
 		height = self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_X)
 		width =  self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_Y)
-		return (width,height)
+		return size_pair([width,height],self.cam)
 
 	@size.setter
 	def size(self,value):
@@ -93,7 +98,7 @@ class image(object):
 	def position(self):
 		y = self.cam.SetImagePos(IS.GET_IMAGE_POS_X)
 		x =  self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
-		r = pair([x,y],self.cam)
+		r = pos_pair([x,y],self.cam)
 		return r
 	
 	@position.setter

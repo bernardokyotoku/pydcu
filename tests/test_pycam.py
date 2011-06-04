@@ -13,12 +13,12 @@ class Test_camera(object):
 		del self.camera
 
 	def test_image_size(self):
-		foo = (500,500)
+		foo = [500,500]
 		self.camera.image.size = foo
 		assert self.camera.image.size == foo 
 
 	def test_image_size_fail(self):
-		foo = (-1,-1)
+		foo = [-1,-1]
 		try:
 			self.camera.image.size = foo
 		except Exception as e:
@@ -39,3 +39,8 @@ class Test_camera(object):
 
 	def test_image_position_x(self):
 		assert self.camera.image.position.x == 0
+
+	def test_image_size_x(self):
+		assert self.camera.image.size.x == 1024 
+
+
