@@ -25,7 +25,7 @@ class Test_camera(object):
 			assert e.args[0] == "An invalid parameter was specified"
 
 	def test_image_position(self):
-		foo = (0,0)
+		foo = [0,0]
 		self.camera.image.position = foo
 		assert self.camera.image.position == foo 
 	
@@ -35,4 +35,7 @@ class Test_camera(object):
 			self.camera.image.position = foo
 		except Exception as e:
 			assert e.args[0] == "An invalid parameter was specified"
-		assert self.camera.image.position == (0,0)
+		assert self.camera.image.position == [0,0]
+
+	def test_image_position_x(self):
+		assert self.camera.image.position.x == 0

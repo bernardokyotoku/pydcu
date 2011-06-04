@@ -43,7 +43,30 @@ def CALL(name, *args):
 	return func(*new_args) 
 
 
+class pair(list):
+	def __init__(self,args,camera):
+		list.__init__(self,args)
+		self.cam = camera
+	
+	@property
+	def x(self):
+		return self[0]
 
+	@x.setter
+	def x(self,value):
+		self[0] = value
+		y = self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
+		self.cam.SetImagePos(value,y)
+
+	@property
+	def y(self):
+		return self[1]
+
+	@y.setter
+	def y(self,value):
+		self[1] = value
+		x = self.cam.SetImagePos(IS.GET_IMAGE_POS_X)
+		self.cam.SetImagePos(x,value)
 
 class image(object):
 	def __init__(self,camera):
@@ -70,7 +93,8 @@ class image(object):
 	def position(self):
 		y = self.cam.SetImagePos(IS.GET_IMAGE_POS_X)
 		x =  self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
-		return (x,y)
+		r = pair([x,y],self.cam)
+		return r
 	
 	@position.setter
 	def position(self,value):
@@ -82,6 +106,7 @@ class image(object):
 		if y is None:
 			y = self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
 		self.cam.SetImagePos(x,y)
+	
 
 class pycam:
 	def __init__(self,camera_id = 0):
