@@ -79,9 +79,9 @@ class image(object):
 
 	@property
 	def size(self):
-		height = self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_X)
-		width =  self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_Y)
-		return size_pair([width,height],self.cam)
+		x = self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_X)
+		y = self.cam.SetImageSize(x=IS.GET_IMAGE_SIZE_Y)
+		return size_pair([x,y],self.cam)
 
 	@size.setter
 	def size(self,value):
@@ -96,8 +96,8 @@ class image(object):
 
 	@property
 	def position(self):
-		y = self.cam.SetImagePos(IS.GET_IMAGE_POS_X)
-		x =  self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
+		x = self.cam.SetImagePos(IS.GET_IMAGE_POS_X)
+		y =  self.cam.SetImagePos(IS.GET_IMAGE_POS_Y)
 		r = pos_pair([x,y],self.cam)
 		return r
 	
@@ -117,11 +117,22 @@ class pycam:
 	def __init__(self,camera_id = 0):
 		self.cam = camera(camera_id)
 		self.image = image(self.cam)
+		self.cam.AllocImageMem()
+		self.cam.SetImageMem()
 
 	def __del__(self):
 		self.cam.ExitCamera()
 
-	def take_snapshot(self):
+	def snapshot(self,filename=None,param=75):
+		self.cam.CaptureVideo(wait=IS.WAIT)
+		self.cam.StopLiveVideo(wait=IS.WAIT)
+		r = self.cam.SaveImage(filename)
+		return r
+
+	def start_capture(self):
+		pass
+
+	def stop_capture(self):
 		pass
 
 class camera(HCAM):
@@ -226,8 +237,9 @@ class camera(HCAM):
 
 	def GetMemorySequenceWindow(self,id):
 		"""
-		The function GetMemorySequenceWindow() can be used to check the window size of a
-		specified memory board sequence. The assigned sequence ID is required as a parameter.
+		The function GetMemorySequenceWindow() can be used to check the 
+		window size of a specified memory board sequence. The assigned 
+		sequence ID is required as a parameter.
 		Not tested!
 		"""
 		top    = INT() 
@@ -420,9 +432,21 @@ class camera(HCAM):
 			byref(self.error),
 			byref(self.error_message))
 
-	def SaveImage(self,file):
-		r = CALL('SaveImage',self,None)
+	def SaveImage(self,filename):
+		file = None if filename == None else c_char_p(filename)
+		print file
+		r = CALL('SaveImage',self,file)
 		return self.CheckForSuccessError(r)
+
+	def SaveImageEx(self,filename=None,format=IS.IMG_JPG,param=75):
+		file = None if filename == None else c_char_p(filename)
+		r = CALL('SaveImageEx',self,file,INT(format))#,INT(format),INT(param))
+		return self.CheckForSuccessError(r)
+
+	def SaveImageMemEx(self,file,type="jpg"):
+		r = CALL('SaveImageMemEx',self,None)
+		return self.CheckForSuccessError(r)
+
 		
 	def SetImagePos(self,x=0,y=0):
 		r = CALL("SetImagePos",self,INT(x),INT(y))

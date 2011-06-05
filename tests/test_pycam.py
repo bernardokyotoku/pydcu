@@ -41,6 +41,8 @@ class Test_camera(object):
 		assert self.camera.image.position.x == 0
 
 	def test_image_size_x(self):
+		print self.camera.image.size.x
 		assert self.camera.image.size.x == 1024 
 
-
+	def test_snapshot(self):
+		self.camera.snapshot("filename.bmp")

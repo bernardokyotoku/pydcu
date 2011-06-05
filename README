@@ -3,3 +3,10 @@ http://www.thorlabs.com/software_pages/ViewSoftwarePage.cfm?Code=DCx
 
 After installed you should have /usr/lib/libueye_api.so in your
 machine.
+
+------------- Usage ------------------------------------------------------------
+
+from uc480 import pycam
+
+camera = pycam()
+camera.snapshot('some_name.bmp')
