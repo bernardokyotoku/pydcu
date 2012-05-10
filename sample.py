@@ -4,7 +4,7 @@ import matplotlib.cm as cm
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 
-camera = uc480.camera()
+camera = uc480.camera(1)
 camera.AllocImageMem()
 camera.SetImageMem()
 camera.SetImageSize()
