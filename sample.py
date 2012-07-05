@@ -1,10 +1,10 @@
-import uc480
+import ueye
 import numpy as np
 import matplotlib.cm as cm
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 
-camera = uc480.camera(1)
+camera = ueye.camera(1)
 camera.AllocImageMem()
 camera.SetImageMem()
 camera.SetImageSize()

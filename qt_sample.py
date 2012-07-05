@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtCore
 import gobject, sys
-import uc480
+import ueye
 import numpy
 
 class Viewer(QtGui.QMainWindow):
@@ -18,7 +18,7 @@ class Viewer(QtGui.QMainWindow):
 #        self.scene.addPixmap(self.pixmap)
 
     def setup_camera(self):
-        self.camera = uc480.camera(1)
+        self.camera = ueye.camera(1)
         self.camera.AllocImageMem()
         self.camera.SetImageMem()
         self.camera.SetImageSize()

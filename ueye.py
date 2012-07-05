@@ -14,26 +14,26 @@ HWND = c_void_p
 INT = c_int
 
 if os.name=='nt':
-	libname = 'uc480'
-	include_uc480_h = os.environ['PROGRAMFILES']+'\\Thorlabs DCU camera\\Develop\\Include\\uc480.h'
+	libname = 'ueye'
+	include_ueye_h = os.environ['PROGRAMFILES']+'\\Thorlabs DCU camera\\Develop\\Include\\ueye.h'
 if os.name=='posix':
 	libname = 'ueye_api'
-	include_uc480_h = "/usr/include/ueye.h"
+	include_ueye_h = "/usr/include/ueye.h"
 lib = util.find_library(libname)
 if lib is None:
-	print 'uc480.dll not found'
+	print 'ueye.dll not found'
 print lib
 
 		
-libuc480 = cdll.LoadLibrary(lib)
+libueye = cdll.LoadLibrary(lib)
 
 
 def CALL(name, *args):
 	"""
-	Calls libuc480 function "name" and arguments "args".
+	Calls libueye function "name" and arguments "args".
 	"""
 	funcname = 'is_' + name
-	func = getattr(libuc480, funcname)
+	func = getattr(libueye, funcname)
 	new_args = []
 	for a in args:		
 		if isinstance (a, unicode):
