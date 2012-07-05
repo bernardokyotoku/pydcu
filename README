@@ -1,5 +1,6 @@
-You can get linux drivers at:
-http://www.thorlabs.com/software_pages/ViewSoftwarePage.cfm?Code=DCx
+You get drivers at:
+http://www.ids-imaging.com/drivers.php?cat=2
+or at
 
 After installed you should have /usr/lib/libueye_api.so in your
 machine.
