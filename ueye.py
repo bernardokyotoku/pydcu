@@ -22,8 +22,6 @@ if os.name=='posix':
 lib = util.find_library(libname)
 if lib is None:
 	print 'ueye.dll not found'
-print lib
-
 		
 libueye = cdll.LoadLibrary(lib)
 
