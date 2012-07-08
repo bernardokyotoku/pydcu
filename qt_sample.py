@@ -30,10 +30,12 @@ class Viewer(QtGui.QMainWindow):
         self.timer.start(1000)
         
     def update_image(self):
+        if hasattr(self,"camera_pixmap"):
+            self.scene.removeItem(self.camera_pixmap)
         self.camera.CopyImageMem()
         image = gray2qimage(self.camera.data)
-        self.scene.addPixmap(QtGui.QPixmap.fromImage(image))
-        self.timer.start(1000)
+        self.camera_pixmap = self.scene.addPixmap(QtGui.QPixmap.fromImage(image))
+        self.timer.start(100)
 
     def closeEvent(self, event):
         self.camera.StopLiveVideo()
